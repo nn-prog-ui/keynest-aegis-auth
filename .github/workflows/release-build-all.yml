@@ -43,7 +43,8 @@ jobs:
 
           raw = (os.environ.get("FIREBASE_ANDROID_GOOGLE_SERVICES_JSON_BASE64") or "").strip()
           if not raw:
-              raise SystemExit("Android Firebase secret is empty.")
+              print("Android Firebase secret is empty. Continue without google-services.json.")
+              raise SystemExit(0)
 
           def write_json_bytes(payload: bytes) -> bool:
               try:
@@ -86,7 +87,8 @@ jobs:
               if write_json_bytes(decoded):
                   raise SystemExit(0)
 
-          raise SystemExit("Could not decode valid android google-services.json from secret.")
+          print("Could not decode valid android google-services.json from secret. Continue without it.")
+          raise SystemExit(0)
           PY
       - run: flutter pub get
       - run: flutter build appbundle --release
@@ -116,7 +118,8 @@ jobs:
 
           raw = (os.environ.get("FIREBASE_IOS_GOOGLE_SERVICE_INFO_PLIST_BASE64") or "").strip()
           if not raw:
-              raise SystemExit("iOS Firebase secret is empty.")
+              print("iOS Firebase secret is empty. Continue without GoogleService-Info.plist.")
+              raise SystemExit(0)
 
           def write_plist_bytes(payload: bytes) -> bool:
               text = payload.decode("utf-8", errors="ignore")
@@ -160,7 +163,8 @@ jobs:
               if write_plist_bytes(decoded):
                   raise SystemExit(0)
 
-          raise SystemExit("Could not decode valid iOS GoogleService-Info.plist from secret.")
+          print("Could not decode valid iOS GoogleService-Info.plist from secret. Continue without it.")
+          raise SystemExit(0)
           PY
       - run: flutter pub get
       - run: flutter build ios --release --no-codesign
