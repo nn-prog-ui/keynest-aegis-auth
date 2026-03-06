@@ -32,10 +32,35 @@ jobs:
       - name: Restore Android Firebase config
         env:
           FIREBASE_ANDROID_GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.FIREBASE_ANDROID_GOOGLE_SERVICES_JSON_BASE64 }}
+        shell: bash
         run: |
-          if [ -n "${FIREBASE_ANDROID_GOOGLE_SERVICES_JSON_BASE64}" ]; then
-            echo "${FIREBASE_ANDROID_GOOGLE_SERVICES_JSON_BASE64}" | base64 --decode > android/app/google-services.json
-          fi
+          python3 - <<'PY'
+          import base64
+          import os
+          import pathlib
+          import re
+
+          raw = (os.environ.get("FIREBASE_ANDROID_GOOGLE_SERVICES_JSON_BASE64") or "").strip()
+          if not raw:
+              print("Android Firebase secret is empty. Skipping restore.")
+              raise SystemExit(0)
+
+          tokens = re.findall(r"[A-Za-z0-9+/=_-]+", raw)
+          if not tokens:
+              raise SystemExit("Android Firebase secret does not contain a base64 token.")
+
+          token = max(tokens, key=len).replace("-", "+").replace("_", "/")
+          token += "=" * (-len(token) % 4)
+          data = base64.b64decode(token, validate=False)
+
+          if b'"project_info"' not in data or b'"client"' not in data:
+              raise SystemExit("Decoded Android Firebase config looks invalid.")
+
+          path = pathlib.Path("android/app/google-services.json")
+          path.parent.mkdir(parents=True, exist_ok=True)
+          path.write_bytes(data)
+          print(f"Restored {path}")
+          PY
       - run: flutter pub get
       - run: flutter build appbundle --release
       - uses: actions/upload-artifact@v4
@@ -54,10 +79,35 @@ jobs:
       - name: Restore iOS Firebase config
         env:
           FIREBASE_IOS_GOOGLE_SERVICE_INFO_PLIST_BASE64: ${{ secrets.FIREBASE_IOS_GOOGLE_SERVICE_INFO_PLIST_BASE64 }}
+        shell: bash
         run: |
-          if [ -n "${FIREBASE_IOS_GOOGLE_SERVICE_INFO_PLIST_BASE64}" ]; then
-            echo "${FIREBASE_IOS_GOOGLE_SERVICE_INFO_PLIST_BASE64}" | base64 --decode > ios/Runner/GoogleService-Info.plist
-          fi
+          python3 - <<'PY'
+          import base64
+          import os
+          import pathlib
+          import re
+
+          raw = (os.environ.get("FIREBASE_IOS_GOOGLE_SERVICE_INFO_PLIST_BASE64") or "").strip()
+          if not raw:
+              print("iOS Firebase secret is empty. Skipping restore.")
+              raise SystemExit(0)
+
+          tokens = re.findall(r"[A-Za-z0-9+/=_-]+", raw)
+          if not tokens:
+              raise SystemExit("iOS Firebase secret does not contain a base64 token.")
+
+          token = max(tokens, key=len).replace("-", "+").replace("_", "/")
+          token += "=" * (-len(token) % 4)
+          data = base64.b64decode(token, validate=False)
+
+          if b"<plist" not in data or b"<dict>" not in data:
+              raise SystemExit("Decoded iOS Firebase config looks invalid.")
+
+          path = pathlib.Path("ios/Runner/GoogleService-Info.plist")
+          path.parent.mkdir(parents=True, exist_ok=True)
+          path.write_bytes(data)
+          print(f"Restored {path}")
+          PY
       - run: flutter pub get
       - run: flutter build ios --release --no-codesign
       - uses: actions/upload-artifact@v4
