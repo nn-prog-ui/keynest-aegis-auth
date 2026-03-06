@@ -36,30 +36,57 @@ jobs:
         run: |
           python3 - <<'PY'
           import base64
+          import json
           import os
           import pathlib
           import re
 
           raw = (os.environ.get("FIREBASE_ANDROID_GOOGLE_SERVICES_JSON_BASE64") or "").strip()
           if not raw:
-              print("Android Firebase secret is empty. Skipping restore.")
-              raise SystemExit(0)
+              raise SystemExit("Android Firebase secret is empty.")
 
-          tokens = re.findall(r"[A-Za-z0-9+/=_-]+", raw)
-          if not tokens:
-              raise SystemExit("Android Firebase secret does not contain a base64 token.")
+          def write_json_bytes(payload: bytes) -> bool:
+              try:
+                  obj = json.loads(payload.decode("utf-8"))
+              except Exception:
+                  return False
+              if "project_info" not in obj or "client" not in obj:
+                  return False
+              path = pathlib.Path("android/app/google-services.json")
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
+              print(f"Restored {path}")
+              return True
 
-          token = max(tokens, key=len).replace("-", "+").replace("_", "/")
-          token += "=" * (-len(token) % 4)
-          data = base64.b64decode(token, validate=False)
+          # Case 1: secret pasted as raw JSON text
+          if "project_info" in raw and "client" in raw and "{" in raw and "}" in raw:
+              start = raw.find("{")
+              end = raw.rfind("}")
+              if start >= 0 and end > start:
+                  if write_json_bytes(raw[start:end + 1].encode("utf-8")):
+                      raise SystemExit(0)
 
-          if b'"project_info"' not in data or b'"client"' not in data:
-              raise SystemExit("Decoded Android Firebase config looks invalid.")
+          # Case 2: secret pasted as base64 (possibly with extra surrounding text)
+          candidates = []
+          candidates.append(raw)
+          candidates.extend(re.findall(r"[A-Za-z0-9+/=_-]{80,}", raw))
 
-          path = pathlib.Path("android/app/google-services.json")
-          path.parent.mkdir(parents=True, exist_ok=True)
-          path.write_bytes(data)
-          print(f"Restored {path}")
+          seen = set()
+          for candidate in sorted(candidates, key=len, reverse=True):
+              token = re.sub(r"\s+", "", candidate)
+              if not token or token in seen:
+                  continue
+              seen.add(token)
+              token = token.replace("-", "+").replace("_", "/")
+              token += "=" * (-len(token) % 4)
+              try:
+                  decoded = base64.b64decode(token, validate=False)
+              except Exception:
+                  continue
+              if write_json_bytes(decoded):
+                  raise SystemExit(0)
+
+          raise SystemExit("Could not decode valid android google-services.json from secret.")
           PY
       - run: flutter pub get
       - run: flutter build appbundle --release
@@ -89,24 +116,51 @@ jobs:
 
           raw = (os.environ.get("FIREBASE_IOS_GOOGLE_SERVICE_INFO_PLIST_BASE64") or "").strip()
           if not raw:
-              print("iOS Firebase secret is empty. Skipping restore.")
-              raise SystemExit(0)
+              raise SystemExit("iOS Firebase secret is empty.")
 
-          tokens = re.findall(r"[A-Za-z0-9+/=_-]+", raw)
-          if not tokens:
-              raise SystemExit("iOS Firebase secret does not contain a base64 token.")
+          def write_plist_bytes(payload: bytes) -> bool:
+              text = payload.decode("utf-8", errors="ignore")
+              if "<plist" not in text or "</plist>" not in text or "<dict>" not in text:
+                  return False
+              start = text.find("<?xml")
+              if start < 0:
+                  start = text.find("<plist")
+              end = text.rfind("</plist>")
+              if start < 0 or end <= start:
+                  return False
+              content = text[start:end + len("</plist>")]
+              path = pathlib.Path("ios/Runner/GoogleService-Info.plist")
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_text(content, encoding="utf-8")
+              print(f"Restored {path}")
+              return True
 
-          token = max(tokens, key=len).replace("-", "+").replace("_", "/")
-          token += "=" * (-len(token) % 4)
-          data = base64.b64decode(token, validate=False)
+          # Case 1: secret pasted as raw plist text
+          if "<plist" in raw and "</plist>" in raw:
+              if write_plist_bytes(raw.encode("utf-8")):
+                  raise SystemExit(0)
 
-          if b"<plist" not in data or b"<dict>" not in data:
-              raise SystemExit("Decoded iOS Firebase config looks invalid.")
+          # Case 2: secret pasted as base64 (possibly with extra surrounding text)
+          candidates = []
+          candidates.append(raw)
+          candidates.extend(re.findall(r"[A-Za-z0-9+/=_-]{80,}", raw))
 
-          path = pathlib.Path("ios/Runner/GoogleService-Info.plist")
-          path.parent.mkdir(parents=True, exist_ok=True)
-          path.write_bytes(data)
-          print(f"Restored {path}")
+          seen = set()
+          for candidate in sorted(candidates, key=len, reverse=True):
+              token = re.sub(r"\s+", "", candidate)
+              if not token or token in seen:
+                  continue
+              seen.add(token)
+              token = token.replace("-", "+").replace("_", "/")
+              token += "=" * (-len(token) % 4)
+              try:
+                  decoded = base64.b64decode(token, validate=False)
+              except Exception:
+                  continue
+              if write_plist_bytes(decoded):
+                  raise SystemExit(0)
+
+          raise SystemExit("Could not decode valid iOS GoogleService-Info.plist from secret.")
           PY
       - run: flutter pub get
       - run: flutter build ios --release --no-codesign
