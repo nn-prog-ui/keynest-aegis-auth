@@ -1,0 +1,25 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "apn": "^2.2.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "google-auth-library": "^9.15.1",
+    "imapflow": "^1.1.1",
+    "mailparser": "^3.7.5",
+    "nodemailer": "^7.0.10",
+    "openai": "^6.17.0"
+  }
+}

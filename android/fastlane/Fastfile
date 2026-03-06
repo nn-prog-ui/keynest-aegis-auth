@@ -1,0 +1,33 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build Android App Bundle"
+  lane :build_aab do
+    sh("cd .. && flutter pub get")
+    sh("cd .. && flutter build appbundle --release")
+  end
+
+  desc "Upload to Google Play internal testing"
+  lane :internal do
+    build_aab
+    upload_to_play_store(
+      track: "internal",
+      aab: "../build/app/outputs/bundle/release/app-release.aab",
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: false
+    )
+  end
+
+  desc "Upload to Google Play production"
+  lane :production do
+    build_aab
+    upload_to_play_store(
+      track: "production",
+      aab: "../build/app/outputs/bundle/release/app-release.aab",
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: false
+    )
+  end
+end

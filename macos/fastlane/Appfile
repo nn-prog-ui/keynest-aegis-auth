@@ -1,0 +1,3 @@
+app_identifier(ENV["APP_IDENTIFIER_MACOS"] || "com.aegisauth.app.macos")
+
+apple_id(ENV["APPLE_ID"]) if ENV["APPLE_ID"]

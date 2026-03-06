@@ -1,0 +1,58 @@
+default_platform(:mac)
+
+def key_path
+  ENV["APP_STORE_CONNECT_API_KEY_PATH"] || "./fastlane/AuthKey.p8"
+end
+
+def connect_api_key
+  app_store_connect_api_key(
+    key_id: ENV.fetch("APP_STORE_CONNECT_API_KEY_ID"),
+    issuer_id: ENV.fetch("APP_STORE_CONNECT_ISSUER_ID"),
+    key_filepath: key_path,
+    duration: 1200,
+    in_house: false
+  )
+end
+
+platform :mac do
+  desc "Build macOS archive/package for App Store"
+  lane :build_pkg do
+    sh("cd .. && flutter pub get")
+    sh("cd .. && flutter build macos --release")
+
+    build_mac_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "../build/macos_fastlane",
+      output_name: "AegisAuth.pkg"
+    )
+  end
+
+  desc "Upload macOS build to TestFlight"
+  lane :testflight do
+    build_pkg
+    upload_to_testflight(
+      api_key: connect_api_key,
+      app_platform: "osx",
+      skip_waiting_for_build_processing: true,
+      distribute_external: false
+    )
+  end
+
+  desc "Submit macOS build to App Review"
+  lane :submit_review do
+    build_pkg
+    upload_to_app_store(
+      api_key: connect_api_key,
+      app_platform: "osx",
+      submit_for_review: true,
+      automatic_release: false,
+      force: true,
+      skip_metadata: true,
+      skip_screenshots: true,
+      run_precheck_before_submit: false
+    )
+  end
+end
