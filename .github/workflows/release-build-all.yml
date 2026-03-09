@@ -112,7 +112,7 @@ jobs:
           storePassword=${ANDROID_UPLOAD_KEYSTORE_PASSWORD}
           keyPassword=${ANDROID_UPLOAD_KEY_PASSWORD}
           keyAlias=${ANDROID_UPLOAD_KEY_ALIAS}
-          storeFile=app/upload-keystore.jks
+          storeFile=upload-keystore.jks
           EOF
 
           echo "Restored Android signing config."
