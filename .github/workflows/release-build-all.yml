@@ -90,6 +90,32 @@ jobs:
           print("Could not decode valid android google-services.json from secret. Continue without it.")
           raise SystemExit(0)
           PY
+      - name: Restore Android signing config
+        env:
+          ANDROID_UPLOAD_KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          ANDROID_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          ANDROID_UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD }}
+          ANDROID_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -z "${ANDROID_UPLOAD_KEYSTORE_BASE64}" ] || [ -z "${ANDROID_UPLOAD_KEY_ALIAS}" ] || [ -z "${ANDROID_UPLOAD_KEYSTORE_PASSWORD}" ] || [ -z "${ANDROID_UPLOAD_KEY_PASSWORD}" ]; then
+            echo "Android signing secrets are missing."
+            exit 1
+          fi
+
+          mkdir -p android/app
+          printf '%s' "${ANDROID_UPLOAD_KEYSTORE_BASE64}" | base64 --decode > android/app/upload-keystore.jks
+
+          cat > android/key.properties <<EOF
+          storePassword=${ANDROID_UPLOAD_KEYSTORE_PASSWORD}
+          keyPassword=${ANDROID_UPLOAD_KEY_PASSWORD}
+          keyAlias=${ANDROID_UPLOAD_KEY_ALIAS}
+          storeFile=app/upload-keystore.jks
+          EOF
+
+          echo "Restored Android signing config."
       - run: flutter pub get
       - run: flutter build appbundle --release
       - uses: actions/upload-artifact@v4
