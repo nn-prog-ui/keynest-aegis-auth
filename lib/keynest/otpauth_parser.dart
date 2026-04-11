@@ -37,7 +37,7 @@ class OtpAuthParser {
     final algorithm =
         (uri.queryParameters['algorithm'] ?? 'SHA1').toUpperCase().trim();
 
-    final normalizedIssuer = issuer.isEmpty ? 'Aegis Auth' : issuer;
+    final normalizedIssuer = issuer.isEmpty ? 'KeyNest' : issuer;
     final normalizedAccount = account.isEmpty ? 'account@example.com' : account;
 
     return VerificationAccount(

@@ -38,7 +38,7 @@ class PushGatewayService {
 
   Future<void> sendTestPush({
     required String deviceId,
-    String title = 'Aegis Auth Test',
+    String title = 'KeyNest Test',
     String body = 'Push通知のテストです',
   }) async {
     final response = await _client.post(

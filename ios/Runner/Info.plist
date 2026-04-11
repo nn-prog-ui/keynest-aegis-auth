@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Aegis Auth</string>
+	<string>KeyNest</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>AegisAuth</string>
+	<string>KeyNest</string>
 	<key>NSCameraUsageDescription</key>
 	<string>QRコードを読み取り、認証アカウントを登録するためにカメラを使用します。</string>
 	<key>NSFaceIDUsageDescription</key>

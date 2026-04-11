@@ -33,7 +33,7 @@ class AegisAuthApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Aegis Auth',
+      title: 'KeyNest',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -267,7 +267,7 @@ class _KeyNestHomeScreenState extends State<KeyNestHomeScreen>
 
   Future<bool> _ensureUnlocked({
     bool force = false,
-    String reason = 'Aegis Authを開くために認証してください',
+    String reason = 'KeyNestを開くために認証してください',
   }) async {
     if (!_deviceLockEnabled) {
       if (!_isUnlocked && mounted) {
@@ -351,7 +351,7 @@ class _KeyNestHomeScreenState extends State<KeyNestHomeScreen>
                         ),
                         const SizedBox(height: 16),
                         const Text(
-                          'Aegis Auth',
+                          'KeyNest',
                           style: TextStyle(
                             fontSize: 13,
                             letterSpacing: 0.3,
@@ -454,7 +454,7 @@ class _KeyNestHomeScreenState extends State<KeyNestHomeScreen>
                         ),
                         const SizedBox(height: 16),
                         const Text(
-                          'Welcome to Aegis Auth',
+                          'Welcome to KeyNest',
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w800,
@@ -1405,7 +1405,7 @@ class _KeyNestHomeScreenState extends State<KeyNestHomeScreen>
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Aegis Auth', style: TextStyle(fontWeight: FontWeight.w800)),
+            Text('KeyNest', style: TextStyle(fontWeight: FontWeight.w800)),
             SizedBox(height: 2),
             Text(
               'Authenticator + Push approvals',
