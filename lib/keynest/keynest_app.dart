@@ -102,6 +102,8 @@ class KeyNestHomeScreen extends StatefulWidget {
 
 class _KeyNestHomeScreenState extends State<KeyNestHomeScreen>
     with WidgetsBindingObserver {
+  static const bool _temporarilyDisableDeviceLock = false;
+
   final KeyNestStorage _storage = KeyNestStorage();
   final DeviceAuthService _deviceAuthService = DeviceAuthService();
   final CloudBackupService _cloudBackupService = CloudBackupService();
@@ -132,6 +134,7 @@ class _KeyNestHomeScreenState extends State<KeyNestHomeScreen>
   bool _pushInitialized = false;
   bool _pushGranted = false;
   int _selectedTab = 0;
+  DateTime? _ignoreLifecycleUntil;
   String? _cloudBackupId;
   String? _deviceId;
   String? _pushFcmToken;
@@ -175,21 +178,26 @@ class _KeyNestHomeScreenState extends State<KeyNestHomeScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!_deviceLockEnabled) {
+    if (_temporarilyDisableDeviceLock || !_deviceLockEnabled || _isUnlocking) {
       return;
     }
+
+    final ignoreUntil = _ignoreLifecycleUntil;
+    if (ignoreUntil != null && DateTime.now().isBefore(ignoreUntil)) {
+      return;
+    }
+
     if (state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.resumed) {
+      return;
+    }
+    if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden) {
       if (_isUnlocked && mounted) {
         setState(() {
           _isUnlocked = false;
         });
       }
-      return;
-    }
-    if (state == AppLifecycleState.resumed) {
-      unawaited(_ensureUnlocked(force: true));
     }
   }
 
@@ -203,15 +211,17 @@ class _KeyNestHomeScreenState extends State<KeyNestHomeScreen>
     final storedApnsToken = await _storage.loadApnsToken();
     final introCompleted = await _storage.loadIntroCompleted();
     final resolvedDeviceId = storedDeviceId ?? _newDeviceId();
+    final effectiveDeviceLockEnabled =
+        _temporarilyDisableDeviceLock ? false : deviceLockEnabled;
 
     if (!mounted) return;
 
     setState(() {
       _accounts = accounts;
       _backupCodes = backupCodes;
-      _deviceLockEnabled = deviceLockEnabled;
+      _deviceLockEnabled = effectiveDeviceLockEnabled;
       _introCompleted = introCompleted;
-      _isUnlocked = !deviceLockEnabled;
+      _isUnlocked = !effectiveDeviceLockEnabled || !introCompleted;
       _cloudBackupId = cloudBackupId;
       _deviceId = resolvedDeviceId;
       _pushFcmToken = storedFcmToken;
@@ -224,7 +234,7 @@ class _KeyNestHomeScreenState extends State<KeyNestHomeScreen>
     }
 
     await _initializePushNotifications();
-    if (introCompleted) {
+    if (introCompleted && effectiveDeviceLockEnabled) {
       await _ensureUnlocked(force: true);
     }
   }
@@ -245,6 +255,10 @@ class _KeyNestHomeScreenState extends State<KeyNestHomeScreen>
   }
 
   Future<void> _setDeviceLockEnabled(bool value) async {
+    if (_temporarilyDisableDeviceLock) {
+      _showSnack('デバイスロックは現在一時的に無効化されています');
+      return;
+    }
     if (value) {
       final unlocked = await _ensureUnlocked(
         force: true,
@@ -291,6 +305,7 @@ class _KeyNestHomeScreenState extends State<KeyNestHomeScreen>
       return true;
     }
 
+    _ignoreLifecycleUntil = DateTime.now().add(const Duration(seconds: 3));
     if (mounted) {
       setState(() {
         _isUnlocking = true;
@@ -306,6 +321,7 @@ class _KeyNestHomeScreenState extends State<KeyNestHomeScreen>
     setState(() {
       _isUnlocking = false;
       _isUnlocked = unlocked;
+      _ignoreLifecycleUntil = DateTime.now().add(const Duration(seconds: 3));
       if (unlocked) {
         _lastUnlockedAt = DateTime.now();
       }
@@ -638,10 +654,9 @@ class _KeyNestHomeScreenState extends State<KeyNestHomeScreen>
         data['organization']?.toString().trim().isNotEmpty == true
             ? data['organization']!.toString().trim()
             : (_accounts.isNotEmpty ? _accounts.first.organization : 'Aegis');
-    final location =
-        data['location']?.toString().trim().isNotEmpty == true
-            ? data['location']!.toString().trim()
-            : 'Unknown';
+    final location = data['location']?.toString().trim().isNotEmpty == true
+        ? data['location']!.toString().trim()
+        : 'Unknown';
     final createdAt = DateTime.tryParse(data['createdAt']?.toString() ?? '') ??
         DateTime.now();
     final newRequest = SignInRequest(
@@ -1276,9 +1291,7 @@ class _KeyNestHomeScreenState extends State<KeyNestHomeScreen>
 
       if (!mounted) return;
       _showSnack(
-        loadResult.usedLocalFallback
-            ? 'オフライン保存データから復元しました'
-            : 'クラウドから復元しました',
+        loadResult.usedLocalFallback ? 'オフライン保存データから復元しました' : 'クラウドから復元しました',
       );
     } catch (error) {
       _showSnack('クラウド復元に失敗しました: $error');

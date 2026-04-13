@@ -31,7 +31,7 @@ class DeviceAuthService {
         localizedReason: reason,
         options: const AuthenticationOptions(
           biometricOnly: false,
-          stickyAuth: true,
+          stickyAuth: false,
           sensitiveTransaction: true,
         ),
       );
