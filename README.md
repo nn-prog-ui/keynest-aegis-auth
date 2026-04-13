@@ -1,10 +1,10 @@
-# KeyNest
+# Nemokey
 
-KeyNest is a Flutter-based authenticator app focused on TOTP, push approvals, and secure restore.
+Nemokey is a Flutter-based authenticator app focused on TOTP, push approvals, and secure restore.
 
 ## Positioning
 
-KeyNest is designed to work in two modes:
+Nemokey is designed to work in two modes:
 
 - Individual use: a lightweight authenticator with QR onboarding, code display, and restore
 - Team / business use: a branded sign-in approval app with push approvals and recovery flows

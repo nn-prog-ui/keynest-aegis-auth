@@ -26,7 +26,7 @@ platform :mac do
       configuration: "Release",
       export_method: "app-store",
       output_directory: "../build/macos_fastlane",
-      output_name: "AegisAuth.pkg"
+      output_name: "Nemokey.pkg"
     )
   end
 

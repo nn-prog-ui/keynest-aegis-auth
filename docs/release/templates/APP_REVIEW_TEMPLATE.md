@@ -5,7 +5,7 @@
 
 ## 1. App Information
 
-- App Name: Aegis Auth
+- App Name: Nemokey
 - Platform: iOS / macOS
 - Version: `<version>`
 - Build Number: `<build>`

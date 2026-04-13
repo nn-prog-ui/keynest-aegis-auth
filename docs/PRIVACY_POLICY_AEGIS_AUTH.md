@@ -1,4 +1,4 @@
-# KeyNest Privacy Policy
+# Nemokey Privacy Policy
 
 最終更新日: 2026-04-13
 

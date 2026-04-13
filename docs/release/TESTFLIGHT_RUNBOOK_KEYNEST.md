@@ -1,9 +1,9 @@
-# KeyNest TestFlight Runbook
+# Nemokey TestFlight Runbook
 
 最終更新: 2026-04-13
 
 ## 目的
-KeyNest の iOS ビルドを App Store Connect / TestFlight に上げるための実行手順を固定する。
+Nemokey の iOS ビルドを App Store Connect / TestFlight に上げるための実行手順を固定する。
 
 ## 現在の前提
 - iOS Bundle ID: `com.nnprogui.keynestauth`
@@ -43,7 +43,7 @@ bundle exec fastlane testflight
 - `submit_review`: `upload_to_app_store(... submit_for_review: true)`
 
 ## TestFlight でやること
-1. `My Apps -> KeyNest -> TestFlight`
+1. `My Apps -> Nemokey -> TestFlight`
 2. ビルド処理完了を待つ
 3. 内部テスターを追加
 4. 必要なら外部テスターを追加

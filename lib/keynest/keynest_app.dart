@@ -33,7 +33,7 @@ class AegisAuthApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'KeyNest',
+      title: 'Nemokey',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -84,23 +84,23 @@ class AegisAuthApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const KeyNestHomeScreen(),
+      home: const NemokeyHomeScreen(),
     );
   }
 }
 
-class KeyNestApp extends AegisAuthApp {
-  const KeyNestApp({super.key});
+class NemokeyApp extends AegisAuthApp {
+  const NemokeyApp({super.key});
 }
 
-class KeyNestHomeScreen extends StatefulWidget {
-  const KeyNestHomeScreen({super.key});
+class NemokeyHomeScreen extends StatefulWidget {
+  const NemokeyHomeScreen({super.key});
 
   @override
-  State<KeyNestHomeScreen> createState() => _KeyNestHomeScreenState();
+  State<NemokeyHomeScreen> createState() => _NemokeyHomeScreenState();
 }
 
-class _KeyNestHomeScreenState extends State<KeyNestHomeScreen>
+class _NemokeyHomeScreenState extends State<NemokeyHomeScreen>
     with WidgetsBindingObserver {
   static const bool _temporarilyDisableDeviceLock = false;
 
@@ -281,7 +281,7 @@ class _KeyNestHomeScreenState extends State<KeyNestHomeScreen>
 
   Future<bool> _ensureUnlocked({
     bool force = false,
-    String reason = 'KeyNestを開くために認証してください',
+    String reason = 'Nemokeyを開くために認証してください',
   }) async {
     if (!_deviceLockEnabled) {
       if (!_isUnlocked && mounted) {
@@ -367,7 +367,7 @@ class _KeyNestHomeScreenState extends State<KeyNestHomeScreen>
                         ),
                         const SizedBox(height: 16),
                         const Text(
-                          'KeyNest',
+                          'Nemokey',
                           style: TextStyle(
                             fontSize: 13,
                             letterSpacing: 0.3,
@@ -470,7 +470,7 @@ class _KeyNestHomeScreenState extends State<KeyNestHomeScreen>
                         ),
                         const SizedBox(height: 16),
                         const Text(
-                          'Welcome to KeyNest',
+                          'Welcome to Nemokey',
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w800,
@@ -1418,7 +1418,7 @@ class _KeyNestHomeScreenState extends State<KeyNestHomeScreen>
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('KeyNest', style: TextStyle(fontWeight: FontWeight.w800)),
+            Text('Nemokey', style: TextStyle(fontWeight: FontWeight.w800)),
             SizedBox(height: 2),
             Text(
               'Authenticator + Push approvals',

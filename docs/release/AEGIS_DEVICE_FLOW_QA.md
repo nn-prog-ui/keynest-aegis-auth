@@ -1,4 +1,4 @@
-# Aegis Auth 実機導線 QA
+# Nemokey 実機導線 QA
 
 対象導線:
 1. 追加
@@ -13,7 +13,7 @@
 - Push検証時は Firebase/APNs 設定済みであること
 
 ## チェック手順
-1. 初回起動で `Welcome to Aegis Auth` が表示されること
+1. 初回起動で `Welcome to Nemokey` が表示されること
 2. `Get started` でホームに遷移すること
 3. `アカウント追加` -> `QRコードを読み取る` から `otpauth://` を登録できること
 4. 追加直後にコードカードへ表示され、残り秒ゲージが進むこと

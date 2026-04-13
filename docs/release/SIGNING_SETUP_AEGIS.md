@@ -1,4 +1,4 @@
-# KeyNest 署名設定
+# Nemokey 署名設定
 
 ## Android
 1. `android/key.properties.example` を `android/key.properties` にコピー

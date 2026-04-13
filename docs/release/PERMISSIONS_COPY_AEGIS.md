@@ -1,4 +1,4 @@
-# KeyNest 権限文言
+# Nemokey 権限文言
 
 ## iOS
 - `NSCameraUsageDescription`

@@ -1,4 +1,4 @@
-# KeyNest launchd 自動実行セットアップ（GitHub不要）
+# Nemokey launchd 自動実行セットアップ（GitHub不要）
 
 この手順で、Macローカルだけで `autopilot` を毎日 09:00 (JST) に実行できます。
 
