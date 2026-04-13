@@ -1,6 +1,13 @@
-# Aegis Auth
+# KeyNest
 
-Aegis Auth is a Flutter-based authenticator app inspired by enterprise verification flows.
+KeyNest is a Flutter-based authenticator app focused on TOTP, push approvals, and secure restore.
+
+## Positioning
+
+KeyNest is designed to work in two modes:
+
+- Individual use: a lightweight authenticator with QR onboarding, code display, and restore
+- Team / business use: a branded sign-in approval app with push approvals and recovery flows
 
 ## Core features
 
@@ -8,8 +15,14 @@ Aegis Auth is a Flutter-based authenticator app inspired by enterprise verificat
 - RFC6238 TOTP generation (SHA1/SHA256/SHA512, 6-8 digits)
 - Push sign-in approvals (Approve / Deny)
 - Device lock (biometric / device authentication)
-- Encrypted backup/restore (PBKDF2 + AES-256-GCM)
+- Encrypted backup / restore (PBKDF2 + AES-256-GCM)
 - Offline fallback for backup restore testing
+
+## Current identifiers
+
+- Android Application ID: `com.aegisauth.app`
+- iOS Bundle ID: `com.nnprogui.keynestauth`
+- macOS Bundle ID: `com.aegisauth.app.macos`
 
 ## Run locally
 
@@ -18,13 +31,13 @@ flutter pub get
 flutter run
 ```
 
-## Build identifiers
-
-- Android Application ID: `com.aegisauth.app`
-- iOS Bundle ID: `com.aegisauth.app`
-
 ## Release docs
 
+- GTM / positioning: `docs/release/GTM_POSITIONING_KEYNEST.md`
+- Store copy: `docs/release/STORE_COPY_KEYNEST.md`
+- Landing page copy: `docs/release/LP_COPY_KEYNEST.md`
+- Launch playbook: `docs/release/LAUNCH_PLAYBOOK_KEYNEST.md`
+- Outreach templates: `docs/release/OUTREACH_TEMPLATES_KEYNEST.md`
 - Device flow QA: `docs/release/AEGIS_DEVICE_FLOW_QA.md`
 - Permissions copy: `docs/release/PERMISSIONS_COPY_AEGIS.md`
 - Privacy policy: `docs/PRIVACY_POLICY_AEGIS_AUTH.md`
@@ -37,4 +50,3 @@ flutter run
 - `POST /api/keynest/push/send-test`
 - `POST /api/keynest/backup/save`
 - `POST /api/keynest/backup/load`
-
