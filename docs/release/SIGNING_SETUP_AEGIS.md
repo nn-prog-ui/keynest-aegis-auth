@@ -1,4 +1,4 @@
-# Aegis Auth 署名設定
+# KeyNest 署名設定
 
 ## Android
 1. `android/key.properties.example` を `android/key.properties` にコピー
@@ -11,7 +11,7 @@ flutter build appbundle --release
 ```
 
 ## iOS
-1. Apple Developer で `com.aegisauth.app` を登録
+1. Apple Developer で `com.nnprogui.keynestauth` を登録
 2. Signing & Capabilities を Team/Provisioning に合わせる
 3. `ios/fastlane/Appfile` の `app_identifier` を確認
 
@@ -24,4 +24,4 @@ flutter build ipa --release --export-method app-store
 - `APP_STORE_CONNECT_API_KEY_ID`
 - `APP_STORE_CONNECT_ISSUER_ID`
 - `APP_STORE_CONNECT_API_KEY_PATH`
-- `APP_IDENTIFIER_IOS=com.aegisauth.app`
+- `APP_IDENTIFIER_IOS=com.nnprogui.keynestauth`
