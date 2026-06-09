@@ -1,4 +1,5 @@
 import { PrismaClient, MunicipalityType, SubsidyStatus, TargetAudience } from '@prisma/client';
+import { NATIONAL_SUBSIDIES } from './subsidies-master';
 
 const prisma = new PrismaClient();
 
@@ -312,6 +313,38 @@ async function main() {
     await prisma.subsidy.create({ data: subsidy });
   }
   console.log(`サンプル補助金 ${sampleSubsidies.length} 件登録完了`);
+
+  // 国の主要補助金・助成金マスターデータ
+  const categories = await prisma.subsidyCategory.findMany();
+  const catMap2 = Object.fromEntries(categories.map((c) => [c.slug, c.id]));
+
+  let masterSaved = 0;
+  for (const s of NATIONAL_SUBSIDIES) {
+    const existing = await prisma.subsidy.findFirst({ where: { title: s.title } });
+    if (!existing) {
+      await prisma.subsidy.create({
+        data: {
+          title: s.title,
+          description: s.description,
+          detail: s.detail,
+          categoryId: catMap2[s.categorySlug] ?? catMap2['business'],
+          isNational: s.isNational,
+          maxAmount: s.maxAmount ? BigInt(s.maxAmount) : undefined,
+          subsidyRate: s.subsidyRate,
+          targetAudience: s.targetAudience,
+          applicationStart: s.applicationStart ? new Date(s.applicationStart) : undefined,
+          applicationEnd: s.applicationEnd ? new Date(s.applicationEnd) : undefined,
+          sourceUrl: s.sourceUrl,
+          status: s.status,
+          tags: s.tags,
+          requirements: s.requirements,
+          howToApply: s.howToApply,
+        },
+      });
+      masterSaved++;
+    }
+  }
+  console.log(`国の主要補助金・助成金 ${masterSaved} 件登録完了（合計 ${NATIONAL_SUBSIDIES.length} 件中）`);
 
   console.log('シードデータ投入完了！');
 }

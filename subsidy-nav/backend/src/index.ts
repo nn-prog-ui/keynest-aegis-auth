@@ -12,6 +12,7 @@ import consultingRoutes from './routes/consulting';
 import adminRoutes from './routes/admin';
 import scraperRoutes from './routes/scraper';
 import matchingRoutes from './routes/matching';
+import pdfRoutes from './routes/pdf';
 import { errorHandler } from './middleware/errorHandler';
 import { startDeadlineNotificationCron } from './services/notificationService';
 import { startScrapeCron } from './services/scraperService';
@@ -45,6 +46,7 @@ app.use('/api/consulting', consultingRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/scraper', scraperRoutes);
 app.use('/api/matching', matchingRoutes);
+app.use('/api/pdf', pdfRoutes);
 
 app.use(errorHandler);
 
