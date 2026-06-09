@@ -6,6 +6,7 @@ import { Menu, X, Bell, Search } from 'lucide-react';
 
 const NAV_LINKS = [
   { href: '/subsidies', label: '補助金を探す' },
+  { href: '/matching', label: '診断で探す' },
   { href: '/alerts', label: 'アラート登録' },
   { href: '/consulting', label: 'コンサルティング' },
 ];

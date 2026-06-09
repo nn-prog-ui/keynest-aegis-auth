@@ -10,8 +10,11 @@ import municipalityRoutes from './routes/municipalities';
 import alertRoutes from './routes/alerts';
 import consultingRoutes from './routes/consulting';
 import adminRoutes from './routes/admin';
+import scraperRoutes from './routes/scraper';
+import matchingRoutes from './routes/matching';
 import { errorHandler } from './middleware/errorHandler';
 import { startDeadlineNotificationCron } from './services/notificationService';
+import { startScrapeCron } from './services/scraperService';
 
 dotenv.config();
 
@@ -40,12 +43,15 @@ app.use('/api/municipalities', municipalityRoutes);
 app.use('/api/alerts', alertRoutes);
 app.use('/api/consulting', consultingRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/scraper', scraperRoutes);
+app.use('/api/matching', matchingRoutes);
 
 app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`補助金ナビ API サーバー起動: http://localhost:${PORT}`);
   startDeadlineNotificationCron();
+  startScrapeCron();
 });
 
 export default app;

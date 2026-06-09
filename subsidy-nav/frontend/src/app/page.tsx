@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Search, Bell, FileText, TrendingUp, MapPin, ChevronRight } from 'lucide-react';
+import { Search, Bell, FileText, TrendingUp, MapPin, ChevronRight, Sparkles } from 'lucide-react';
 import { getSubsidyStats, getSubsidies } from '@/lib/api';
 import SubsidyCard from '@/components/SubsidyCard';
 
@@ -71,6 +71,13 @@ export default async function HomePage() {
             >
               <Search size={18} />
               補助金を検索する
+            </Link>
+            <Link
+              href="/matching"
+              className="btn-primary bg-yellow-400 text-yellow-900 hover:bg-yellow-300 text-base px-8 py-3"
+            >
+              <Sparkles size={18} />
+              診断で探す（3問）
             </Link>
             <Link
               href="/alerts"

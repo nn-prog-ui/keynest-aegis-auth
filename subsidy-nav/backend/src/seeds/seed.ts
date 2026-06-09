@@ -78,19 +78,129 @@ async function main() {
   }
   console.log(`都道府県 ${PREFECTURES.length} 件登録完了`);
 
-  // 主要市区町村（東京・大阪・愛知のサンプル）
-  const tokyo = await prisma.prefecture.findUnique({ where: { code: '13' } });
-  const osaka = await prisma.prefecture.findUnique({ where: { code: '27' } });
-  const aichi = await prisma.prefecture.findUnique({ where: { code: '23' } });
+  // 全国主要市区町村（政令指定都市・県庁所在地・特別区を中心に）
+  const prefMap: Record<string, number> = {};
+  const allPrefs = await prisma.prefecture.findMany();
+  for (const p of allPrefs) prefMap[p.code] = p.id;
 
   const municipalities = [
-    { prefectureId: tokyo!.id, code: '13101', name: '千代田区', nameKana: 'チヨダク', type: MunicipalityType.WARD },
-    { prefectureId: tokyo!.id, code: '13102', name: '中央区', nameKana: 'チュウオウク', type: MunicipalityType.WARD },
-    { prefectureId: tokyo!.id, code: '13113', name: '渋谷区', nameKana: 'シブヤク', type: MunicipalityType.WARD },
-    { prefectureId: tokyo!.id, code: '13201', name: '八王子市', nameKana: 'ハチオウジシ', type: MunicipalityType.CITY },
-    { prefectureId: osaka!.id, code: '27100', name: '大阪市', nameKana: 'オオサカシ', type: MunicipalityType.CITY },
-    { prefectureId: osaka!.id, code: '27140', name: '堺市', nameKana: 'サカイシ', type: MunicipalityType.CITY },
-    { prefectureId: aichi!.id, code: '23100', name: '名古屋市', nameKana: 'ナゴヤシ', type: MunicipalityType.CITY },
+    // 北海道
+    { prefectureId: prefMap['01'], code: '01100', name: '札幌市', nameKana: 'サッポロシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['01'], code: '01202', name: '函館市', nameKana: 'ハコダテシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['01'], code: '01204', name: '旭川市', nameKana: 'アサヒカワシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['01'], code: '01206', name: '釧路市', nameKana: 'クシロシ', type: MunicipalityType.CITY },
+    // 東北
+    { prefectureId: prefMap['02'], code: '02201', name: '青森市', nameKana: 'アオモリシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['02'], code: '02202', name: '弘前市', nameKana: 'ヒロサキシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['03'], code: '03201', name: '盛岡市', nameKana: 'モリオカシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['04'], code: '04100', name: '仙台市', nameKana: 'センダイシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['05'], code: '05201', name: '秋田市', nameKana: 'アキタシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['06'], code: '06201', name: '山形市', nameKana: 'ヤマガタシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['07'], code: '07201', name: '福島市', nameKana: 'フクシマシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['07'], code: '07204', name: 'いわき市', nameKana: 'イワキシ', type: MunicipalityType.CITY },
+    // 関東
+    { prefectureId: prefMap['08'], code: '08201', name: '水戸市', nameKana: 'ミトシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['08'], code: '08220', name: 'つくば市', nameKana: 'ツクバシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['09'], code: '09201', name: '宇都宮市', nameKana: 'ウツノミヤシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['10'], code: '10201', name: '前橋市', nameKana: 'マエバシシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['10'], code: '10202', name: '高崎市', nameKana: 'タカサキシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['11'], code: '11100', name: 'さいたま市', nameKana: 'サイタマシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['11'], code: '11202', name: '川越市', nameKana: 'カワゴエシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['11'], code: '11203', name: '熊谷市', nameKana: 'クマガヤシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['12'], code: '12100', name: '千葉市', nameKana: 'チバシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['12'], code: '12204', name: '船橋市', nameKana: 'フナバシシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['12'], code: '12217', name: '柏市', nameKana: 'カシワシ', type: MunicipalityType.CITY },
+    // 東京23区
+    { prefectureId: prefMap['13'], code: '13101', name: '千代田区', nameKana: 'チヨダク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13102', name: '中央区', nameKana: 'チュウオウク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13103', name: '港区', nameKana: 'ミナトク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13104', name: '新宿区', nameKana: 'シンジュクク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13105', name: '文京区', nameKana: 'ブンキョウク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13106', name: '台東区', nameKana: 'タイトウク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13107', name: '墨田区', nameKana: 'スミダク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13108', name: '江東区', nameKana: 'コウトウク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13109', name: '品川区', nameKana: 'シナガワク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13110', name: '目黒区', nameKana: 'メグロク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13111', name: '大田区', nameKana: 'オオタク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13112', name: '世田谷区', nameKana: 'セタガヤク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13113', name: '渋谷区', nameKana: 'シブヤク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13114', name: '中野区', nameKana: 'ナカノク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13115', name: '杉並区', nameKana: 'スギナミク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13116', name: '豊島区', nameKana: 'トシマク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13117', name: '北区', nameKana: 'キタク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13118', name: '荒川区', nameKana: 'アラカワク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13119', name: '板橋区', nameKana: 'イタバシク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13120', name: '練馬区', nameKana: 'ネリマク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13121', name: '足立区', nameKana: 'アダチク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13122', name: '葛飾区', nameKana: 'カツシカク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13123', name: '江戸川区', nameKana: 'エドガワク', type: MunicipalityType.WARD },
+    { prefectureId: prefMap['13'], code: '13201', name: '八王子市', nameKana: 'ハチオウジシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['13'], code: '13202', name: '立川市', nameKana: 'タチカワシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['13'], code: '13206', name: '三鷹市', nameKana: 'ミタカシ', type: MunicipalityType.CITY },
+    // 神奈川
+    { prefectureId: prefMap['14'], code: '14100', name: '横浜市', nameKana: 'ヨコハマシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['14'], code: '14130', name: '川崎市', nameKana: 'カワサキシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['14'], code: '14150', name: '相模原市', nameKana: 'サガミハラシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['14'], code: '14201', name: '横須賀市', nameKana: 'ヨコスカシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['14'], code: '14203', name: '平塚市', nameKana: 'ヒラツカシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['14'], code: '14204', name: '鎌倉市', nameKana: 'カマクラシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['14'], code: '14210', name: '藤沢市', nameKana: 'フジサワシ', type: MunicipalityType.CITY },
+    // 甲信越・北陸
+    { prefectureId: prefMap['15'], code: '15100', name: '新潟市', nameKana: 'ニイガタシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['16'], code: '16201', name: '富山市', nameKana: 'トヤマシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['17'], code: '17201', name: '金沢市', nameKana: 'カナザワシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['18'], code: '18201', name: '福井市', nameKana: 'フクイシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['19'], code: '19201', name: '甲府市', nameKana: 'コウフシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['20'], code: '20201', name: '長野市', nameKana: 'ナガノシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['20'], code: '20202', name: '松本市', nameKana: 'マツモトシ', type: MunicipalityType.CITY },
+    // 東海
+    { prefectureId: prefMap['21'], code: '21201', name: '岐阜市', nameKana: 'ギフシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['22'], code: '22100', name: '静岡市', nameKana: 'シズオカシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['22'], code: '22130', name: '浜松市', nameKana: 'ハママツシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['23'], code: '23100', name: '名古屋市', nameKana: 'ナゴヤシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['23'], code: '23202', name: '豊橋市', nameKana: 'トヨハシシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['23'], code: '23204', name: '豊田市', nameKana: 'トヨタシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['24'], code: '24201', name: '津市', nameKana: 'ツシ', type: MunicipalityType.CITY },
+    // 近畿
+    { prefectureId: prefMap['25'], code: '25201', name: '大津市', nameKana: 'オオツシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['26'], code: '26100', name: '京都市', nameKana: 'キョウトシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['27'], code: '27100', name: '大阪市', nameKana: 'オオサカシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['27'], code: '27140', name: '堺市', nameKana: 'サカイシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['27'], code: '27203', name: '豊中市', nameKana: 'トヨナカシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['27'], code: '27207', name: '枚方市', nameKana: 'ヒラカタシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['28'], code: '28100', name: '神戸市', nameKana: 'コウベシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['28'], code: '28201', name: '姫路市', nameKana: 'ヒメジシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['28'], code: '28210', name: '尼崎市', nameKana: 'アマガサキシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['29'], code: '29201', name: '奈良市', nameKana: 'ナラシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['30'], code: '30201', name: '和歌山市', nameKana: 'ワカヤマシ', type: MunicipalityType.CITY },
+    // 中国
+    { prefectureId: prefMap['31'], code: '31201', name: '鳥取市', nameKana: 'トットリシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['32'], code: '32201', name: '松江市', nameKana: 'マツエシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['33'], code: '33100', name: '岡山市', nameKana: 'オカヤマシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['34'], code: '34100', name: '広島市', nameKana: 'ヒロシマシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['34'], code: '34202', name: '呉市', nameKana: 'クレシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['34'], code: '34207', name: '福山市', nameKana: 'フクヤマシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['35'], code: '35201', name: '下関市', nameKana: 'シモノセキシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['35'], code: '35203', name: '宇部市', nameKana: 'ウベシ', type: MunicipalityType.CITY },
+    // 四国
+    { prefectureId: prefMap['36'], code: '36201', name: '徳島市', nameKana: 'トクシマシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['37'], code: '37201', name: '高松市', nameKana: 'タカマツシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['38'], code: '38201', name: '松山市', nameKana: 'マツヤマシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['39'], code: '39201', name: '高知市', nameKana: 'コウチシ', type: MunicipalityType.CITY },
+    // 九州
+    { prefectureId: prefMap['40'], code: '40100', name: '北九州市', nameKana: 'キタキュウシュウシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['40'], code: '40130', name: '福岡市', nameKana: 'フクオカシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['40'], code: '40203', name: '久留米市', nameKana: 'クルメシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['41'], code: '41201', name: '佐賀市', nameKana: 'サガシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['42'], code: '42201', name: '長崎市', nameKana: 'ナガサキシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['43'], code: '43100', name: '熊本市', nameKana: 'クマモトシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['44'], code: '44201', name: '大分市', nameKana: 'オオイタシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['45'], code: '45201', name: '宮崎市', nameKana: 'ミヤザキシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['46'], code: '46201', name: '鹿児島市', nameKana: 'カゴシマシ', type: MunicipalityType.CITY },
+    // 沖縄
+    { prefectureId: prefMap['47'], code: '47201', name: '那覇市', nameKana: 'ナハシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['47'], code: '47205', name: '沖縄市', nameKana: 'オキナワシ', type: MunicipalityType.CITY },
+    { prefectureId: prefMap['47'], code: '47207', name: '浦添市', nameKana: 'ウラソエシ', type: MunicipalityType.CITY },
   ];
 
   for (const muni of municipalities) {

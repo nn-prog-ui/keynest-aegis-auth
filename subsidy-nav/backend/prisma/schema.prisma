@@ -149,3 +149,18 @@ enum InquiryStatus {
   IN_PROGRESS // 対応中
   RESOLVED    // 完了
 }
+
+model ScrapeLog {
+  id               Int      @id @default(autoincrement())
+  municipalityCode String
+  url              String
+  scrapedCount     Int      @default(0)
+  savedCount       Int      @default(0)
+  status           String   // SUCCESS | ERROR
+  errorMessage     String?
+  createdAt        DateTime @default(now())
+
+  @@index([municipalityCode])
+  @@index([createdAt])
+  @@map("scrape_logs")
+}
