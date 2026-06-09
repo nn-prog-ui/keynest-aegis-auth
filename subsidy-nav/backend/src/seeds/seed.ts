@@ -1,5 +1,6 @@
 import { PrismaClient, MunicipalityType, SubsidyStatus, TargetAudience } from '@prisma/client';
 import { NATIONAL_SUBSIDIES } from './subsidies-master';
+import { ALL_MUNICIPALITIES } from '../data/municipalities-all';
 
 const prisma = new PrismaClient();
 
@@ -211,7 +212,28 @@ async function main() {
       create: muni,
     });
   }
-  console.log(`市区町村 ${municipalities.length} 件登録完了`);
+  console.log(`主要市区町村 ${municipalities.length} 件登録完了`);
+
+  // 全国1,741市区町村データの一括投入
+  let fullMuniSaved = 0;
+  let fullMuniSkipped = 0;
+  for (const m of ALL_MUNICIPALITIES) {
+    const prefId = prefMap[m.prefCode];
+    if (!prefId) { fullMuniSkipped++; continue; }
+    await prisma.municipality.upsert({
+      where: { code: m.code },
+      update: {},
+      create: {
+        prefectureId: prefId,
+        code: m.code,
+        name: m.name,
+        nameKana: m.nameKana,
+        type: m.type as MunicipalityType,
+      },
+    });
+    fullMuniSaved++;
+  }
+  console.log(`全国市区町村 ${fullMuniSaved} 件登録完了（スキップ: ${fullMuniSkipped} 件）`);
 
   // カテゴリ
   for (const cat of CATEGORIES) {
