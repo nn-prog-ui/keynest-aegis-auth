@@ -16,6 +16,7 @@ import pdfRoutes from './routes/pdf';
 import { errorHandler } from './middleware/errorHandler';
 import { startDeadlineNotificationCron } from './services/notificationService';
 import { startScrapeCron } from './services/scraperService';
+import { startWeeklyDigestCron } from './services/weeklyDigestService';
 
 dotenv.config();
 
@@ -54,6 +55,7 @@ app.listen(PORT, () => {
   console.log(`補助金ナビ API サーバー起動: http://localhost:${PORT}`);
   startDeadlineNotificationCron();
   startScrapeCron();
+  startWeeklyDigestCron();
 });
 
 export default app;

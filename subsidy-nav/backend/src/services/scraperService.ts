@@ -2,6 +2,7 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { PrismaClient, SubsidyStatus, TargetAudience } from '@prisma/client';
 import { CronJob } from 'cron';
+import { SCRAPE_TARGETS as TARGET_LIST, ScrapeTarget } from '../data/scrape-targets';
 
 const prisma = new PrismaClient();
 
@@ -14,30 +15,6 @@ interface ScrapedSubsidy {
   sourceUrl: string;
   tags: string[];
 }
-
-interface MunicipalityScrapeTarget {
-  municipalityCode: string;
-  municipalityName: string;
-  subsidyPageUrl: string;
-  categoryId: number;
-}
-
-// 市区町村ごとのスクレイピング対象定義
-// 実運用では全市区町村分を拡張する
-const SCRAPE_TARGETS: MunicipalityScrapeTarget[] = [
-  {
-    municipalityCode: '13113',
-    municipalityName: '渋谷区',
-    subsidyPageUrl: 'https://www.city.shibuya.tokyo.jp/kenko/josei/',
-    categoryId: 1,
-  },
-  {
-    municipalityCode: '27100',
-    municipalityName: '大阪市',
-    subsidyPageUrl: 'https://www.city.osaka.lg.jp/contents/wdu070/shienkin/',
-    categoryId: 3,
-  },
-];
 
 // ドメインごとのレート制限（ms）
 const DOMAIN_DELAY_MS = 3000;
@@ -56,12 +33,11 @@ function sleep(ms: number) {
 }
 
 // 汎用HTML補助金パーサー
-// 各自治体サイトのよくある構造（テーブル・リスト）を解析
 function parseSubsidiesFromHtml(html: string, baseUrl: string): ScrapedSubsidy[] {
   const $ = cheerio.load(html);
   const results: ScrapedSubsidy[] = [];
 
-  // パターン1: <table>形式（多くの自治体で使われる）
+  // パターン1: <table>形式
   $('table tr').each((_i, row) => {
     const cells = $(row).find('td');
     if (cells.length >= 2) {
@@ -177,25 +153,63 @@ function inferTargetAudience(text: string): TargetAudience[] {
   return audiences.length > 0 ? audiences : [TargetAudience.INDIVIDUAL];
 }
 
+// URLを複数試みて最初に成功したHTMLを返す
+async function fetchFirstSuccess(
+  urls: string[]
+): Promise<{ html: string; url: string } | null> {
+  for (const url of urls) {
+    try {
+      const res = await axios.get(url, {
+        timeout: REQUEST_TIMEOUT_MS,
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (compatible; SubsidyNavBot/1.0; +https://subsidy-nav.jp/bot)',
+          Accept: 'text/html,application/xhtml+xml',
+          'Accept-Language': 'ja,en;q=0.9',
+        },
+      });
+      return { html: res.data, url };
+    } catch {
+      // 次のURLを試みる
+    }
+  }
+  return null;
+}
+
 // 1件の市区町村をスクレイピング
 export async function scrapeMunicipality(
-  target: MunicipalityScrapeTarget
+  target: ScrapeTarget
 ): Promise<{ scraped: number; saved: number; errors: string[] }> {
   const errors: string[] = [];
   let saved = 0;
 
   try {
-    const response = await axios.get(target.subsidyPageUrl, {
-      timeout: REQUEST_TIMEOUT_MS,
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (compatible; SubsidyNavBot/1.0; +https://subsidy-nav.jp/bot)',
-        Accept: 'text/html,application/xhtml+xml',
-        'Accept-Language': 'ja,en;q=0.9',
-      },
-    });
+    const result = await fetchFirstSuccess(target.urls);
+    if (!result) {
+      const msg = `全てのURLに失敗: ${target.urls.join(', ')}`;
+      errors.push(`${target.name}: ${msg}`);
+      await prisma.scrapeLog.create({
+        data: {
+          municipalityCode: target.municipalityCode,
+          url: target.urls[0],
+          scrapedCount: 0,
+          savedCount: 0,
+          status: 'ERROR',
+          errorMessage: msg,
+        },
+      });
+      return { scraped: 0, saved, errors };
+    }
 
-    const subsidies = parseSubsidiesFromHtml(response.data, target.subsidyPageUrl);
+    const { html, url: successUrl } = result;
+
+    // カテゴリIDを解決
+    const categories = await prisma.subsidyCategory.findMany({
+      where: { slug: { in: target.categoryHints } },
+    });
+    const primaryCategoryId = categories[0]?.id ?? 3; // fallback: business
+
+    const subsidies = parseSubsidiesFromHtml(html, successUrl);
 
     const municipality = await prisma.municipality.findUnique({
       where: { code: target.municipalityCode },
@@ -204,6 +218,16 @@ export async function scrapeMunicipality(
 
     if (!municipality) {
       errors.push(`市区町村コード ${target.municipalityCode} が見つかりません`);
+      await prisma.scrapeLog.create({
+        data: {
+          municipalityCode: target.municipalityCode,
+          url: successUrl,
+          scrapedCount: subsidies.length,
+          savedCount: 0,
+          status: 'ERROR',
+          errorMessage: `市区町村コード ${target.municipalityCode} が見つかりません`,
+        },
+      });
       return { scraped: subsidies.length, saved, errors };
     }
 
@@ -221,7 +245,7 @@ export async function scrapeMunicipality(
           data: {
             title: s.title,
             description: s.description,
-            categoryId: target.categoryId,
+            categoryId: primaryCategoryId,
             municipalityId: municipality.id,
             prefectureId: municipality.prefectureId,
             sourceUrl: s.sourceUrl,
@@ -243,7 +267,7 @@ export async function scrapeMunicipality(
     await prisma.scrapeLog.create({
       data: {
         municipalityCode: target.municipalityCode,
-        url: target.subsidyPageUrl,
+        url: successUrl,
         scrapedCount: subsidies.length,
         savedCount: saved,
         status: 'SUCCESS',
@@ -253,12 +277,12 @@ export async function scrapeMunicipality(
     return { scraped: subsidies.length, saved, errors };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    errors.push(`${target.municipalityName}: ${msg}`);
+    errors.push(`${target.name}: ${msg}`);
 
     await prisma.scrapeLog.create({
       data: {
         municipalityCode: target.municipalityCode,
-        url: target.subsidyPageUrl,
+        url: target.urls[0],
         scrapedCount: 0,
         savedCount: 0,
         status: 'ERROR',
@@ -282,8 +306,8 @@ export async function scrapeAll(): Promise<{
 
   const domainLastAccess: Record<string, number> = {};
 
-  for (const target of SCRAPE_TARGETS) {
-    const domain = extractDomain(target.subsidyPageUrl);
+  for (const target of TARGET_LIST) {
+    const domain = extractDomain(target.urls[0]);
     const lastAccess = domainLastAccess[domain] || 0;
     const elapsed = Date.now() - lastAccess;
 
@@ -299,22 +323,22 @@ export async function scrapeAll(): Promise<{
     allErrors.push(...result.errors);
 
     console.log(
-      `[スクレイパー] ${target.municipalityName}: ${result.scraped}件取得 / ${result.saved}件保存`
+      `[スクレイパー] ${target.name}: ${result.scraped}件取得 / ${result.saved}件保存`
     );
   }
 
   return { total: totalScraped, saved: totalSaved, errors: allErrors };
 }
 
-// 毎日深夜2時に自動スクレイピング
+// 毎週月曜日 深夜2時に自動スクレイピング
 export function startScrapeCron() {
-  const job = new CronJob('0 2 * * *', async () => {
-    console.log('[スクレイパー] 自動スクレイピング開始...');
+  const job = new CronJob('0 0 2 * * 1', async () => {
+    console.log('[スクレイパー] 週次スクレイピング開始...');
     const result = await scrapeAll();
     console.log(
       `[スクレイパー] 完了: ${result.total}件取得 / ${result.saved}件保存 / エラー${result.errors.length}件`
     );
   });
   job.start();
-  console.log('スクレイパーCronジョブ開始 (毎日 02:00)');
+  console.log('スクレイパーCronジョブ開始 (毎週月曜 02:00)');
 }
