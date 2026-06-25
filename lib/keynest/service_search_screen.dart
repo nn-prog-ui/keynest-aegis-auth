@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'aegis_palette.dart';
 import 'service_account_add_screen.dart';
-import 'service_suggestion.dart';
+import 'service_master.dart';
 
 class ServiceSearchScreen extends StatefulWidget {
   const ServiceSearchScreen({super.key});
@@ -13,26 +13,16 @@ class ServiceSearchScreen extends StatefulWidget {
 
 class _ServiceSearchScreenState extends State<ServiceSearchScreen> {
   final _searchController = TextEditingController();
+  final _serviceMasterRepository = const ServiceMasterRepository();
   String _selectedCategory = 'すべて';
 
-  List<String> get _categories {
-    return [
-      'すべて',
-      ...serviceSuggestions
-          .map((suggestion) => suggestion.category)
-          .toSet()
-          .toList()
-        ..sort(),
-    ];
-  }
+  List<String> get _categories => _serviceMasterRepository.categories();
 
-  List<ServiceSuggestion> get _filteredSuggestions {
-    final query = _searchController.text;
-    return serviceSuggestions.where((suggestion) {
-      final categoryMatches = _selectedCategory == 'すべて' ||
-          suggestion.category == _selectedCategory;
-      return categoryMatches && suggestion.matches(query);
-    }).toList();
+  List<ServiceMaster> get _filteredSuggestions {
+    return _serviceMasterRepository.search(
+      query: _searchController.text,
+      category: _selectedCategory,
+    );
   }
 
   @override
@@ -41,11 +31,11 @@ class _ServiceSearchScreenState extends State<ServiceSearchScreen> {
     super.dispose();
   }
 
-  Future<void> _openSuggestion(ServiceSuggestion suggestion) async {
+  Future<void> _openSuggestion(ServiceMaster suggestion) async {
     final savedServiceName = await Navigator.of(context).push<String>(
       MaterialPageRoute(
         builder: (_) => ServiceAccountAddScreen(
-          initialServiceName: suggestion.serviceName,
+          initialServiceName: suggestion.name,
           initialDomains: suggestion.domains.join(', '),
           initialLoginUrl: suggestion.loginUrl,
           initialCurrency: suggestion.defaultCurrency,
@@ -71,9 +61,8 @@ class _ServiceSearchScreenState extends State<ServiceSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final popular = serviceSuggestions.where((item) => item.isPopular).toList();
-    final recentlyAdded =
-        serviceSuggestions.where((item) => item.isRecentlyAdded).toList();
+    final popular = _serviceMasterRepository.popular();
+    final recentlyAdded = _serviceMasterRepository.recentlyAdded();
     final filtered = _filteredSuggestions;
 
     return Scaffold(
@@ -149,7 +138,7 @@ class _ServiceSearchScreenState extends State<ServiceSearchScreen> {
 
   Widget _buildSuggestionSection(
     String title,
-    List<ServiceSuggestion> suggestions, {
+    List<ServiceMaster> suggestions, {
     bool showEmptyState = false,
   }) {
     if (suggestions.isEmpty && !showEmptyState) {
@@ -177,8 +166,8 @@ class _ServiceSearchScreenState extends State<ServiceSearchScreen> {
     );
   }
 
-  Widget _buildSuggestionCard(ServiceSuggestion suggestion) {
-    final badge = suggestion.serviceName.characters.first.toUpperCase();
+  Widget _buildSuggestionCard(ServiceMaster suggestion) {
+    final badge = suggestion.name.characters.first.toUpperCase();
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: InkWell(
@@ -210,7 +199,7 @@ class _ServiceSearchScreenState extends State<ServiceSearchScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      suggestion.serviceName,
+                      suggestion.name,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
