@@ -18,6 +18,11 @@
 		A1B2C3D4E5F60718293A4B5C /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B5D /* GoogleService-Info.plist */; };
 		FE1A00000000000000000001 /* CredentialProviderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1A00000000000000000003 /* CredentialProviderViewController.swift */; };
 		FE1A00000000000000000002 /* CredentialProvider.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = FE1A00000000000000000006 /* CredentialProvider.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		FE1A00000000000000000013 /* SharedCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1A00000000000000000017 /* SharedCredential.swift */; };
+		FE1A00000000000000000014 /* SharedCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1A00000000000000000018 /* SharedCredentialStore.swift */; };
+		FE1A00000000000000000015 /* SharedCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1A00000000000000000017 /* SharedCredential.swift */; };
+		FE1A00000000000000000016 /* SharedCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1A00000000000000000018 /* SharedCredentialStore.swift */; };
+		FE1A00000000000000000019 /* AutoFillCredentialBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1A0000000000000000001A /* AutoFillCredentialBridge.swift */; };
 		FF87481A3DEFE3524207FB30 /* libPods-Runner.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D7D958C8B2613E712402202D /* libPods-Runner.a */; };
 /* End PBXBuildFile section */
 
@@ -91,6 +96,9 @@
 		FE1A00000000000000000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FE1A00000000000000000005 /* CredentialProvider.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CredentialProvider.entitlements; sourceTree = "<group>"; };
 		FE1A00000000000000000006 /* CredentialProvider.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CredentialProvider.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		FE1A00000000000000000017 /* SharedCredential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCredential.swift; sourceTree = "<group>"; };
+		FE1A00000000000000000018 /* SharedCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCredentialStore.swift; sourceTree = "<group>"; };
+		FE1A0000000000000000001A /* AutoFillCredentialBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFillCredentialBridge.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -165,6 +173,7 @@
 			isa = PBXGroup;
 			children = (
 				9740EEB11CF90186004384FC /* Flutter */,
+				FE1A0000000000000000001B /* SharedCredentials */,
 				FE1A00000000000000000008 /* CredentialProvider */,
 				97C146F01CF9000F007C117D /* Runner */,
 				97C146EF1CF9000F007C117D /* Products */,
@@ -195,9 +204,19 @@
 				1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */,
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
+				FE1A0000000000000000001A /* AutoFillCredentialBridge.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 			);
 			path = Runner;
+			sourceTree = "<group>";
+		};
+		FE1A0000000000000000001B /* SharedCredentials */ = {
+			isa = PBXGroup;
+			children = (
+				FE1A00000000000000000017 /* SharedCredential.swift */,
+				FE1A00000000000000000018 /* SharedCredentialStore.swift */,
+			);
+			path = SharedCredentials;
 			sourceTree = "<group>";
 		};
 		FE1A00000000000000000008 /* CredentialProvider */ = {
@@ -453,6 +472,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE1A00000000000000000019 /* AutoFillCredentialBridge.swift in Sources */,
+				FE1A00000000000000000013 /* SharedCredential.swift in Sources */,
+				FE1A00000000000000000014 /* SharedCredentialStore.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 			);
@@ -462,6 +484,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE1A00000000000000000015 /* SharedCredential.swift in Sources */,
+				FE1A00000000000000000016 /* SharedCredentialStore.swift in Sources */,
 				FE1A00000000000000000001 /* CredentialProviderViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
