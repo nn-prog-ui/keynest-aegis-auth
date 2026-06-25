@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 
 import 'aegis_palette.dart';
 import 'service_detail_screen.dart';
+import 'service_search_screen.dart';
 import 'shared_credential_bridge.dart';
 
 class ServiceListScreen extends StatefulWidget {
-  const ServiceListScreen({super.key});
+  const ServiceListScreen({
+    super.key,
+    this.showAppBar = true,
+  });
+
+  final bool showAppBar;
 
   @override
   State<ServiceListScreen> createState() => _ServiceListScreenState();
@@ -26,6 +32,19 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
     setState(() {
       _credentialsFuture = _credentialBridge.listCredentials();
     });
+  }
+
+  Future<void> _openServiceSearch() async {
+    final savedServiceName = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const ServiceSearchScreen()),
+    );
+    if (!mounted || savedServiceName == null) {
+      return;
+    }
+    _reload();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$savedServiceName を保存しました')),
+    );
   }
 
   Map<String, double> _monthlyTotalsByCurrency(
@@ -69,16 +88,18 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('サービス一覧'),
-        actions: [
-          IconButton(
-            onPressed: _reload,
-            icon: const Icon(Icons.refresh_rounded),
-            tooltip: '更新',
-          ),
-        ],
-      ),
+      appBar: widget.showAppBar
+          ? AppBar(
+              title: const Text('サービス一覧'),
+              actions: [
+                IconButton(
+                  onPressed: _reload,
+                  icon: const Icon(Icons.refresh_rounded),
+                  tooltip: '更新',
+                ),
+              ],
+            )
+          : null,
       body: SafeArea(
         child: FutureBuilder<List<SharedCredentialListItem>>(
           future: _credentialsFuture,
@@ -120,6 +141,11 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
             );
           },
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _openServiceSearch,
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('サービス追加'),
       ),
     );
   }

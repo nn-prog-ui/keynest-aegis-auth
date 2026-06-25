@@ -18,6 +18,7 @@ import 'push_gateway_service.dart';
 import 'push_notification_service.dart';
 import 'qr_scan_screen.dart';
 import 'aegis_palette.dart';
+import 'fela_shell_screen.dart';
 import 'service_list_screen.dart';
 import 'service_search_screen.dart';
 
@@ -78,7 +79,7 @@ class AegisAuthApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const NemokeyHomeScreen(),
+      home: const FelaShellScreen(),
     );
   }
 }
