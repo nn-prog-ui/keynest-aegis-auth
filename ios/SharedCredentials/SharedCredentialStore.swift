@@ -92,6 +92,38 @@ final class SharedCredentialStore {
         }
     }
 
+    func credentials() throws -> [SharedCredential] {
+        var query = baseQuery()
+        query[kSecReturnData as String] = true
+        query[kSecMatchLimit as String] = kSecMatchLimitAll
+
+        var result: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        if status == errSecItemNotFound {
+            return []
+        }
+        guard status == errSecSuccess else {
+            throw SharedCredentialStoreError.keychainStatus(status)
+        }
+        guard let dataItems = result as? [Data] else {
+            throw SharedCredentialStoreError.decodingFailed
+        }
+
+        do {
+            return try dataItems
+                .map { try decoder.decode(SharedCredential.self, from: $0) }
+                .sorted { lhs, rhs in
+                    let lhsName = lhs.serviceName.localizedCaseInsensitiveCompare(rhs.serviceName)
+                    if lhsName == .orderedSame {
+                        return lhs.updatedAt > rhs.updatedAt
+                    }
+                    return lhsName == .orderedAscending
+                }
+        } catch {
+            throw SharedCredentialStoreError.decodingFailed
+        }
+    }
+
     func delete(recordIdentifier: String) throws {
         guard !recordIdentifier.isEmpty else {
             throw SharedCredentialStoreError.invalidRecordIdentifier
@@ -101,6 +133,17 @@ final class SharedCredentialStore {
         guard status == errSecSuccess || status == errSecItemNotFound else {
             throw SharedCredentialStoreError.keychainStatus(status)
         }
+    }
+
+    private func baseQuery() -> [String: Any] {
+        var query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service
+        ]
+
+        query[kSecAttrAccessGroup as String] = accessGroup
+
+        return query
     }
 
     private func baseQuery(recordIdentifier: String) -> [String: Any] {

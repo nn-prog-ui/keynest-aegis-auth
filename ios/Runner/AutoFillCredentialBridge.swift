@@ -12,6 +12,8 @@ final class AutoFillCredentialBridge {
                 saveCredential(arguments: call.arguments, result: result)
             case "getCredential":
                 getCredential(arguments: call.arguments, result: result)
+            case "listCredentials":
+                listCredentials(result: result)
             case "deleteCredential":
                 deleteCredential(arguments: call.arguments, result: result)
             default:
@@ -44,6 +46,15 @@ final class AutoFillCredentialBridge {
             result(dictionary(from: credential))
         } catch {
             result(FlutterError(code: "credential_read_failed", message: "Credential could not be read.", details: nil))
+        }
+    }
+
+    private static func listCredentials(result: FlutterResult) {
+        do {
+            let credentials = try SharedCredentialStore.shared.credentials()
+            result(credentials.map { listDictionary(from: $0) })
+        } catch {
+            result(FlutterError(code: "credential_list_failed", message: "Credentials could not be listed.", details: nil))
         }
     }
 
@@ -115,6 +126,26 @@ final class AutoFillCredentialBridge {
 
         dictionary["loginUrl"] = credential.loginURL
         dictionary["totpSecret"] = credential.totpSecret
+        dictionary["monthlyPrice"] = credential.monthlyPrice.map { NSDecimalNumber(decimal: $0).stringValue }
+        dictionary["currency"] = credential.currency
+        dictionary["billingCycle"] = credential.billingCycle
+        dictionary["renewalDate"] = credential.renewalDate.map { ISO8601DateFormatter().string(from: $0) }
+        dictionary["paymentMethod"] = credential.paymentMethod
+        dictionary["cancelUrl"] = credential.cancelURL
+        return dictionary
+    }
+
+    private static func listDictionary(from credential: SharedCredential) -> [String: Any] {
+        var dictionary: [String: Any] = [
+            "recordIdentifier": credential.recordIdentifier,
+            "serviceName": credential.serviceName,
+            "domains": credential.domains,
+            "username": credential.username,
+            "hasTotpSecret": credential.totpSecret?.isEmpty == false,
+            "updatedAt": ISO8601DateFormatter().string(from: credential.updatedAt)
+        ]
+
+        dictionary["loginUrl"] = credential.loginURL
         dictionary["monthlyPrice"] = credential.monthlyPrice.map { NSDecimalNumber(decimal: $0).stringValue }
         dictionary["currency"] = credential.currency
         dictionary["billingCycle"] = credential.billingCycle
