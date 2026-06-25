@@ -1,10 +1,10 @@
-# Nemokey
+# Fela
 
-Nemokey is a Flutter-based authenticator app focused on TOTP, push approvals, and secure restore.
+Fela is a Flutter-based authenticator app focused on TOTP, push approvals, and secure restore.
 
 ## Positioning
 
-Nemokey is designed to work in two modes:
+Fela is designed to work in two modes:
 
 - Individual use: a lightweight authenticator with QR onboarding, code display, and restore
 - Team / business use: a branded sign-in approval app with push approvals and recovery flows

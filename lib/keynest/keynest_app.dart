@@ -33,7 +33,7 @@ class AegisAuthApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Nemokey',
+      title: 'Fela',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -281,7 +281,7 @@ class _NemokeyHomeScreenState extends State<NemokeyHomeScreen>
 
   Future<bool> _ensureUnlocked({
     bool force = false,
-    String reason = 'Nemokeyを開くために認証してください',
+    String reason = 'Felaを開くために認証してください',
   }) async {
     if (!_deviceLockEnabled) {
       if (!_isUnlocked && mounted) {
@@ -367,7 +367,7 @@ class _NemokeyHomeScreenState extends State<NemokeyHomeScreen>
                         ),
                         const SizedBox(height: 16),
                         const Text(
-                          'Nemokey',
+                          'Fela',
                           style: TextStyle(
                             fontSize: 13,
                             letterSpacing: 0.3,
@@ -470,7 +470,7 @@ class _NemokeyHomeScreenState extends State<NemokeyHomeScreen>
                         ),
                         const SizedBox(height: 16),
                         const Text(
-                          'Welcome to Nemokey',
+                          'Welcome to Fela',
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w800,
@@ -1418,7 +1418,7 @@ class _NemokeyHomeScreenState extends State<NemokeyHomeScreen>
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Nemokey', style: TextStyle(fontWeight: FontWeight.w800)),
+            Text('Fela', style: TextStyle(fontWeight: FontWeight.w800)),
             SizedBox(height: 2),
             Text(
               'Authenticator + Push approvals',

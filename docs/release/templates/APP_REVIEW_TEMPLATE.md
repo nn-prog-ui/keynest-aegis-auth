@@ -5,7 +5,7 @@
 
 ## 1. App Information
 
-- App Name: Nemokey
+- App Name: Fela
 - Platform: iOS / macOS
 - Version: `<version>`
 - Build Number: `<build>`

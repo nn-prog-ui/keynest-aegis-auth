@@ -1,4 +1,4 @@
-# Nemokey LP Deployment
+# Fela LP Deployment
 
 ## 目的
 `web/landing.html` を使って、最小の公開導線をすぐに作る。

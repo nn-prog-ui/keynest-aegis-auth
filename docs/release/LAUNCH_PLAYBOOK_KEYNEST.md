@@ -1,4 +1,4 @@
-# Nemokey Launch Playbook
+# Fela Launch Playbook
 
 ## Goal
 個人ユーザーの初期流入を作りつつ、法人導入の相談導線を同時に立ち上げる。

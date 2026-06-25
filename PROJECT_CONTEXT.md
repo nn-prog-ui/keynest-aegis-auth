@@ -19,7 +19,7 @@ Fela は、Flutter ベースの認証アプリです。主な用途は TOTP 認�
 
 このプロジェクトの現在の正式名称は Fela です。
 
-ただし、リポジトリ内の実装・表示・文書はまだ完全には Fela へ改名されていません。今後の作業では Fela を正式名称として扱い、旧名称は移行対象として整理します。
+表示名・文書・ストア提出素材は第1段階としてFelaへ統一済みです。ただし、内部識別子、Bundle ID、API path、storage key、クラス名、ディレクトリ名には旧名称由来の要素が残っています。
 
 ## GitHub URL
 
@@ -47,10 +47,10 @@ https://github.com/nn-prog-ui/keynest-aegis-auth
 
 ## 現在の名称混在状況
 
-Felaへの改名は未完了です。現在、以下の名称が混在しています。
+Felaへの改名は第1段階まで完了しています。現在、以下の名称が混在しています。
 
-- Fela: 現在の正式名称。まだリポジトリ内には十分反映されていません。
-- Nemokey: README、Flutter表示名、Webタイトル、Android/iOS/macOS表示名、リリース文書に残っています。
+- Fela: 現在の正式名称。表示名、README、Webタイトル、Android/iOS/macOS表示名、リリース文書に反映済みです。
+- Nemokey: 旧表示名。第1段階で主要な表示名と提出素材からは除去済みです。
 - KeyNest: ディレクトリ名、クラス名、API path、保存キー、Bundle ID、リリース文書名に残っています。
 - Aegis: Dartクラス名、Application ID、Bundle ID、Windows表示名、画像アセット名、リリース文書名に残っています。
 
@@ -95,8 +95,8 @@ Felaへの改名は未完了です。現在、以下の名称が混在してい�
 
 ## 未完了タスク
 
-- Felaへの改名範囲を確定する。
-- 表示名、文書、LPをFelaへ更新する。
+- Felaへの改名第2段階の範囲を確定する。
+- 表示名、文書、LPのFela統一状態を確認する。
 - 必要に応じて内部コード名をFelaへ更新する。
 - Bundle ID / Application ID を変更するか維持するか判断する。
 - API pathを変更するか、互換性のため残すか判断する。

@@ -1,4 +1,4 @@
-# Nemokey Release Autopilot (2026-03-05 to 2026-03-28)
+# Fela Release Autopilot (2026-03-05 to 2026-03-28)
 
 このドキュメントは、以下4フェーズをGitHub Actionsで日次自動実行するための設定です。
 

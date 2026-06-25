@@ -1,9 +1,9 @@
-# Nemokey 配布チェックリスト（iOS / Android / macOS / Windows）
+# Fela 配布チェックリスト（iOS / Android / macOS / Windows）
 
 最終更新: 2026-04-13
 
 ## 0. 事前共通
-- プロダクト名: `Nemokey`
+- プロダクト名: `Fela`
 - ポジショニング: `企業向け軽量認証アプリ。ただし個人無料配布で導入導線も作る`
 - iOS Bundle ID: `com.nnprogui.keynestauth`
 - Android Application ID: `com.aegisauth.app`

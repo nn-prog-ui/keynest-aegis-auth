@@ -1,4 +1,4 @@
-# Nemokey 権限文言
+# Fela 権限文言
 
 ## iOS
 - `NSCameraUsageDescription`

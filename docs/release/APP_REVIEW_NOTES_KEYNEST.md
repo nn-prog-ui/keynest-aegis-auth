@@ -1,16 +1,16 @@
-# Nemokey App Review Notes
+# Fela App Review Notes
 
 最終更新: 2026-04-13
 
 ## App Information
-- App Name: Nemokey
+- App Name: Fela
 - Platform: iOS
 - Bundle ID: `com.nnprogui.keynestauth`
 - Category: Business / Utilities（最終選択に合わせて修正）
 
 ## Review Notes (貼り付け用)
 ```text
-Nemokey is an authenticator app that provides:
+Fela is an authenticator app that provides:
 - QR code registration for OTP accounts
 - RFC6238 compatible one-time code generation
 - Push-based sign-in approval requests

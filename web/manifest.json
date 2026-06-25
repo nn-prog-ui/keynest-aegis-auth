@@ -1,11 +1,11 @@
 {
-    "name": "Venemo",
-    "short_name": "Venemo",
+    "name": "Fela",
+    "short_name": "Fela",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Fela is a lightweight authenticator app with TOTP, push approvals, and secure restore.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

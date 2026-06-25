@@ -45,8 +45,8 @@
 
 ## Fela改名状況
 
-- 現時点の公開表示名はFelaではない。
-- README、Flutter `MaterialApp`、Webタイトル、Android/iOS/macOS表示名には別名が入っている。
+- 表示名・README・Webタイトル・Android/iOS/macOS表示名・docs/release配下の提出素材はFelaへ統一済み。
+- 内部識別子、Bundle ID、API path、storage key、クラス名、ディレクトリ名には旧名称由来の要素が残っている。
 - 旧名称KeyNest由来の要素が多く残っている。
   - `lib/keynest/`
   - `KeyNestStorage`
@@ -67,7 +67,7 @@
 
 ## 次回やること
 
-1. Felaとして変更する範囲を決める。
+1. Fela改名第2段階として変更する範囲を決める。
    - 表示名のみ
    - 文書とLPまで
    - 内部コード名まで
