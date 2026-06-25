@@ -20,6 +20,12 @@
 	<string>QRコードを読み取り、認証アカウントを登録するためにカメラを使用します。</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>認証コードとサインイン承認を保護するためにFace IDを使用します。</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>このアプリではマイクを使用しませんが、関連するシステム権限確認のため説明文を設定しています。</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>必要に応じて認証アカウント登録に関連する画像を写真ライブラリへ保存するために使用します。</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>QRコード画像を選択して認証アカウントを登録するために写真ライブラリを使用します。</string>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>サインイン承認リクエストを通知するために使用します。</string>
 	<key>FirebaseAppDelegateProxyEnabled</key>
