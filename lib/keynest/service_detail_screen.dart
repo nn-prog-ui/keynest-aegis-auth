@@ -7,6 +7,14 @@ class ServiceDetailScreen extends StatelessWidget {
 
   final SharedCredentialListItem credential;
 
+  static const Color _brand = Color(0xFF0B8F6D);
+  static const Color _brandSoft = Color(0xFFEFF7F3);
+  static const Color _textMuted = Color(0xFF6B7280);
+  static const Color _border = Color(0xFFCDE5DC);
+  static const Color _warning = Color(0xFFB45309);
+  static const Color _warningSoft = Color(0xFFFFF7ED);
+  static const Color _neutralSoft = Color(0xFFF3F4F6);
+
   String _formatDate(DateTime? value) {
     if (value == null) {
       return '-';
@@ -38,6 +46,14 @@ class ServiceDetailScreen extends StatelessWidget {
     return '$price ${_text(credential.currency ?? 'JPY')}';
   }
 
+  bool get _hasSubscription {
+    return _text(credential.monthlyPrice) != '-' ||
+        _text(credential.billingCycle) != '-' ||
+        credential.renewalDate != null ||
+        _text(credential.paymentMethod) != '-' ||
+        _text(credential.cancelUrl) != '-';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,9 +67,9 @@ class ServiceDetailScreen extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
           children: [
             _headerCard(),
-            const SizedBox(height: 12),
-            _sectionCard(
-              title: 'ログイン情報',
+            const SizedBox(height: 14),
+            _infoCard(
+              title: 'ログイン',
               icon: Icons.login_rounded,
               children: [
                 _detailRow('メールアドレス / ID', credential.username),
@@ -62,37 +78,53 @@ class ServiceDetailScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            _sectionCard(
+            _infoCard(
               title: '認証コード',
               icon: Icons.verified_user_rounded,
               children: [
                 _statusRow(
-                  label: 'TOTP',
+                  label: '登録状態',
                   value: credential.hasTotpSecret ? '登録あり' : '未登録',
                   active: credential.hasTotpSecret,
                 ),
+                if (!credential.hasTotpSecret)
+                  _emptyHint('ログイン時に使う6桁コードはあとから追加できます。'),
               ],
             ),
             const SizedBox(height: 12),
-            _sectionCard(
+            _infoCard(
               title: 'サブスク',
               icon: Icons.payments_outlined,
               children: [
-                _detailRow('月額料金', _priceText()),
-                _detailRow('請求周期', _text(credential.billingCycle)),
-                _detailRow('更新日', _formatDate(credential.renewalDate)),
-                _detailRow('支払い方法', _text(credential.paymentMethod)),
-                _detailRow('解約URL', _text(credential.cancelUrl)),
+                if (_hasSubscription) ...[
+                  _detailRow('月額料金', _priceText()),
+                  _detailRow('請求周期', _text(credential.billingCycle)),
+                  _detailRow('更新日', _formatDate(credential.renewalDate)),
+                  _detailRow('支払い方法', _text(credential.paymentMethod)),
+                  _detailRow('解約URL', _text(credential.cancelUrl)),
+                ] else ...[
+                  _statusRow(label: '登録状態', value: '未登録', active: false),
+                  _emptyHint('料金、更新日、支払い方法はあとから追加できます。'),
+                ],
               ],
             ),
             const SizedBox(height: 12),
-            _sectionCard(
+            _infoCard(
               title: 'AutoFill',
               icon: Icons.password_rounded,
               children: [
-                _statusRow(label: '対応状態', value: '準備中', active: false),
+                _statusRow(
+                  label: '対応状態',
+                  value: '準備中',
+                  active: false,
+                  pending: true,
+                ),
+                _detailRow('対応ドメイン', _joinDomains(credential.domains)),
+                _emptyHint('自動入力候補の本登録は次のステップで対応します。'),
               ],
             ),
+            const SizedBox(height: 12),
+            _actionsCard(),
           ],
         ),
       ),
@@ -114,7 +146,7 @@ class ServiceDetailScreen extends StatelessWidget {
               height: 48,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: const Color(0xFF0B8F6D),
+                color: _brand,
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Text(
@@ -141,7 +173,23 @@ class ServiceDetailScreen extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     _joinDomains(credential.domains),
-                    style: const TextStyle(color: Color(0xFF6B7280)),
+                    style: const TextStyle(color: _textMuted),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _statusBadge(
+                        credential.hasTotpSecret ? '2FAあり' : '2FA未登録',
+                        active: credential.hasTotpSecret,
+                      ),
+                      _statusBadge(
+                        _hasSubscription ? 'サブスクあり' : 'サブスク未登録',
+                        active: _hasSubscription,
+                      ),
+                      _statusBadge('AutoFill準備中', pending: true),
+                    ],
                   ),
                 ],
               ),
@@ -152,7 +200,7 @@ class ServiceDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _sectionCard({
+  Widget _infoCard({
     required String title,
     required IconData icon,
     required List<Widget> children,
@@ -165,7 +213,16 @@ class ServiceDetailScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, size: 20, color: const Color(0xFF0B8F6D)),
+                Container(
+                  width: 32,
+                  height: 32,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: _brandSoft,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, size: 18, color: _brand),
+                ),
                 const SizedBox(width: 8),
                 Text(
                   title,
@@ -194,7 +251,7 @@ class ServiceDetailScreen extends StatelessWidget {
             width: 118,
             child: Text(
               label,
-              style: const TextStyle(color: Color(0xFF6B7280)),
+              style: const TextStyle(color: _textMuted),
             ),
           ),
           const SizedBox(width: 10),
@@ -213,10 +270,8 @@ class ServiceDetailScreen extends StatelessWidget {
     required String label,
     required String value,
     required bool active,
+    bool pending = false,
   }) {
-    final color = active ? const Color(0xFF0B8F6D) : const Color(0xFF6B7280);
-    final background =
-        active ? const Color(0xFFEFF7F3) : const Color(0xFFF3F4F6);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 7),
       child: Row(
@@ -225,26 +280,119 @@ class ServiceDetailScreen extends StatelessWidget {
             width: 118,
             child: Text(
               label,
-              style: const TextStyle(color: Color(0xFF6B7280)),
+              style: const TextStyle(color: _textMuted),
             ),
           ),
           const SizedBox(width: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: background,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Text(
-              value,
-              style: TextStyle(
-                color: color,
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
+          _statusBadge(value, active: active, pending: pending),
         ],
+      ),
+    );
+  }
+
+  Widget _statusBadge(
+    String label, {
+    bool active = false,
+    bool pending = false,
+  }) {
+    final color = active ? _brand : (pending ? _warning : _textMuted);
+    final background =
+        active ? _brandSoft : (pending ? _warningSoft : _neutralSoft);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: active ? _border : Colors.transparent),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+
+  Widget _emptyHint(String text) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 6),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _neutralSoft,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: _textMuted,
+          fontWeight: FontWeight.w600,
+          height: 1.35,
+        ),
+      ),
+    );
+  }
+
+  Widget _actionsCard() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: _brandSoft,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.tune_rounded,
+                    size: 18,
+                    color: _brand,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  '操作',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: null,
+                    icon: const Icon(Icons.edit_outlined),
+                    label: const Text('編集'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: null,
+                    icon: const Icon(Icons.delete_outline),
+                    label: const Text('削除'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '編集と削除の実処理は次のステップで対応します。',
+              style: TextStyle(color: _textMuted, fontSize: 12),
+            ),
+          ],
+        ),
       ),
     );
   }
