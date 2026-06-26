@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'aegis_palette.dart';
+import 'service_account_add_screen.dart';
 import 'service_detail_screen.dart';
 import 'service_search_screen.dart';
 import 'shared_credential_bridge.dart';
@@ -35,15 +36,16 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
   }
 
   Future<void> _openServiceSearch() async {
-    final savedServiceName = await Navigator.of(context).push<String>(
+    final saveResult =
+        await Navigator.of(context).push<ServiceAccountSaveResult>(
       MaterialPageRoute(builder: (_) => const ServiceSearchScreen()),
     );
-    if (!mounted || savedServiceName == null) {
+    if (!mounted || saveResult == null) {
       return;
     }
     _reload();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$savedServiceName を保存しました')),
+      SnackBar(content: Text(saveResult.snackMessage)),
     );
   }
 

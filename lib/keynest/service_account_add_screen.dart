@@ -3,6 +3,28 @@ import 'package:flutter/services.dart';
 
 import 'shared_credential_bridge.dart';
 
+class ServiceAccountSaveResult {
+  const ServiceAccountSaveResult({
+    required this.serviceName,
+    required this.autoFillTried,
+    required this.autoFillRegistered,
+  });
+
+  final String serviceName;
+  final bool autoFillTried;
+  final bool autoFillRegistered;
+
+  String get snackMessage {
+    if (!autoFillTried) {
+      return '$serviceName を保存しました';
+    }
+    if (autoFillRegistered) {
+      return '$serviceName を保存しました。AutoFill登録を試しました';
+    }
+    return '$serviceName を保存しました。AutoFill登録はあとで再試行できます';
+  }
+}
+
 class ServiceAccountAddScreen extends StatefulWidget {
   const ServiceAccountAddScreen({
     super.key,
@@ -106,7 +128,7 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
     });
 
     try {
-      await _credentialBridge.saveCredential(
+      final recordIdentifier = await _credentialBridge.saveCredential(
         SharedCredentialSaveRequest(
           serviceName: _serviceNameController.text.trim(),
           domains: _domains,
@@ -121,10 +143,17 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
           cancelUrl: _cancelUrlController.text.trim(),
         ),
       );
+      final autoFillResult = await _tryRegisterAutoFill(recordIdentifier);
       if (!mounted) {
         return;
       }
-      Navigator.of(context).pop(_serviceNameController.text.trim());
+      Navigator.of(context).pop(
+        ServiceAccountSaveResult(
+          serviceName: _serviceNameController.text.trim(),
+          autoFillTried: true,
+          autoFillRegistered: autoFillResult,
+        ),
+      );
     } on PlatformException catch (error) {
       _showLocalSnack('保存に失敗しました: ${error.message ?? error.code}');
     } catch (error) {
@@ -135,6 +164,15 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
           _isSaving = false;
         });
       }
+    }
+  }
+
+  Future<bool> _tryRegisterAutoFill(String recordIdentifier) async {
+    try {
+      await _credentialBridge.registerAutoFillCredential(recordIdentifier);
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 

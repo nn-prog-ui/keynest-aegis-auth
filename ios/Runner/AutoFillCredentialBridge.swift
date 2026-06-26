@@ -16,6 +16,8 @@ final class AutoFillCredentialBridge {
                 listCredentials(result: result)
             case "deleteCredential":
                 deleteCredential(arguments: call.arguments, result: result)
+            case "registerAutoFillCredential":
+                registerAutoFillCredential(arguments: call.arguments, result: result)
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -69,6 +71,33 @@ final class AutoFillCredentialBridge {
             result(nil)
         } catch {
             result(FlutterError(code: "credential_delete_failed", message: "Credential could not be deleted.", details: nil))
+        }
+    }
+
+    private static func registerAutoFillCredential(arguments: Any?, result: @escaping FlutterResult) {
+        guard let recordIdentifier = recordIdentifierFromArguments(arguments) else {
+            result(FlutterError(code: "invalid_record_identifier", message: "recordIdentifier is required.", details: nil))
+            return
+        }
+
+        do {
+            guard let credential = try SharedCredentialStore.shared.credential(recordIdentifier: recordIdentifier) else {
+                result(FlutterError(code: "credential_not_found", message: "Credential could not be found.", details: nil))
+                return
+            }
+
+            AutoFillCredentialIdentityStore.shared.register(credential) { registrationResult in
+                DispatchQueue.main.async {
+                    switch registrationResult {
+                    case .success(let count):
+                        result(["registeredIdentityCount": count])
+                    case .failure(let error):
+                        result(FlutterError(code: "autofill_registration_failed", message: "AutoFill identity could not be registered.", details: String(describing: error)))
+                    }
+                }
+            }
+        } catch {
+            result(FlutterError(code: "credential_read_failed", message: "Credential could not be read.", details: nil))
         }
     }
 

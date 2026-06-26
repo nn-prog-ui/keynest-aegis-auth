@@ -23,6 +23,7 @@
 		FE1A00000000000000000015 /* SharedCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1A00000000000000000017 /* SharedCredential.swift */; };
 		FE1A00000000000000000016 /* SharedCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1A00000000000000000018 /* SharedCredentialStore.swift */; };
 		FE1A00000000000000000019 /* AutoFillCredentialBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1A0000000000000000001A /* AutoFillCredentialBridge.swift */; };
+		FE1A0000000000000000001C /* AutoFillCredentialIdentityStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1A0000000000000000001D /* AutoFillCredentialIdentityStore.swift */; };
 		FF87481A3DEFE3524207FB30 /* libPods-Runner.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D7D958C8B2613E712402202D /* libPods-Runner.a */; };
 /* End PBXBuildFile section */
 
@@ -99,6 +100,7 @@
 		FE1A00000000000000000017 /* SharedCredential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCredential.swift; sourceTree = "<group>"; };
 		FE1A00000000000000000018 /* SharedCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCredentialStore.swift; sourceTree = "<group>"; };
 		FE1A0000000000000000001A /* AutoFillCredentialBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFillCredentialBridge.swift; sourceTree = "<group>"; };
+		FE1A0000000000000000001D /* AutoFillCredentialIdentityStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFillCredentialIdentityStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -215,6 +217,7 @@
 			children = (
 				FE1A00000000000000000017 /* SharedCredential.swift */,
 				FE1A00000000000000000018 /* SharedCredentialStore.swift */,
+				FE1A0000000000000000001D /* AutoFillCredentialIdentityStore.swift */,
 			);
 			path = SharedCredentials;
 			sourceTree = "<group>";
@@ -473,6 +476,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FE1A00000000000000000019 /* AutoFillCredentialBridge.swift in Sources */,
+				FE1A0000000000000000001C /* AutoFillCredentialIdentityStore.swift in Sources */,
 				FE1A00000000000000000013 /* SharedCredential.swift in Sources */,
 				FE1A00000000000000000014 /* SharedCredentialStore.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,

@@ -32,7 +32,8 @@ class _ServiceSearchScreenState extends State<ServiceSearchScreen> {
   }
 
   Future<void> _openSuggestion(ServiceMaster suggestion) async {
-    final savedServiceName = await Navigator.of(context).push<String>(
+    final saveResult =
+        await Navigator.of(context).push<ServiceAccountSaveResult>(
       MaterialPageRoute(
         builder: (_) => ServiceAccountAddScreen(
           initialServiceName: suggestion.name,
@@ -43,20 +44,21 @@ class _ServiceSearchScreenState extends State<ServiceSearchScreen> {
         ),
       ),
     );
-    if (!mounted || savedServiceName == null) {
+    if (!mounted || saveResult == null) {
       return;
     }
-    Navigator.of(context).pop(savedServiceName);
+    Navigator.of(context).pop(saveResult);
   }
 
   Future<void> _openManualAdd() async {
-    final savedServiceName = await Navigator.of(context).push<String>(
+    final saveResult =
+        await Navigator.of(context).push<ServiceAccountSaveResult>(
       MaterialPageRoute(builder: (_) => const ServiceAccountAddScreen()),
     );
-    if (!mounted || savedServiceName == null) {
+    if (!mounted || saveResult == null) {
       return;
     }
-    Navigator.of(context).pop(savedServiceName);
+    Navigator.of(context).pop(saveResult);
   }
 
   @override

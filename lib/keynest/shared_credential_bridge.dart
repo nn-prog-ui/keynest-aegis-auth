@@ -154,6 +154,18 @@ class SharedCredentialBridge {
     return recordIdentifier;
   }
 
+  Future<int> registerAutoFillCredential(String recordIdentifier) async {
+    final result = await _channel.invokeMapMethod<String, Object?>(
+      'registerAutoFillCredential',
+      {'recordIdentifier': recordIdentifier},
+    );
+    final count = result?['registeredIdentityCount'];
+    if (count is int) {
+      return count;
+    }
+    return int.tryParse(count?.toString() ?? '') ?? 0;
+  }
+
   Future<List<SharedCredentialListItem>> listCredentials() async {
     final result =
         await _channel.invokeListMethod<Object?>('listCredentials') ??

@@ -19,6 +19,7 @@ import 'push_notification_service.dart';
 import 'qr_scan_screen.dart';
 import 'aegis_palette.dart';
 import 'fela_shell_screen.dart';
+import 'service_account_add_screen.dart';
 import 'service_list_screen.dart';
 import 'service_search_screen.dart';
 
@@ -866,13 +867,14 @@ class _NemokeyHomeScreenState extends State<NemokeyHomeScreen>
   }
 
   Future<void> _openServiceAccountAddScreen() async {
-    final savedServiceName = await Navigator.of(context).push<String>(
+    final saveResult =
+        await Navigator.of(context).push<ServiceAccountSaveResult>(
       MaterialPageRoute(builder: (_) => const ServiceSearchScreen()),
     );
-    if (!mounted || savedServiceName == null) {
+    if (!mounted || saveResult == null) {
       return;
     }
-    _showSnack('$savedServiceName を保存しました');
+    _showSnack(saveResult.snackMessage);
   }
 
   Future<void> _scanQrAndAdd() async {
