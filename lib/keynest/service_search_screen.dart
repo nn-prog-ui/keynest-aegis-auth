@@ -170,7 +170,6 @@ class _ServiceSearchScreenState extends State<ServiceSearchScreen> {
   }
 
   Widget _buildSuggestionCard(ServiceMaster suggestion) {
-    final badge = suggestion.name.characters.first.toUpperCase();
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: InkWell(
@@ -180,22 +179,7 @@ class _ServiceSearchScreenState extends State<ServiceSearchScreen> {
           padding: const EdgeInsets.all(14),
           child: Row(
             children: [
-              Container(
-                width: 42,
-                height: 42,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AegisPalette.brand,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  badge,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
+              _serviceIcon(suggestion),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -230,6 +214,57 @@ class _ServiceSearchScreenState extends State<ServiceSearchScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _serviceIcon(ServiceMaster service) {
+    final color = Color(service.iconColor);
+    final isSoft = service.iconStyle == 'soft';
+    final isOutline = service.iconStyle == 'outline';
+    final isAccent = service.iconStyle == 'accent';
+    final background = isOutline
+        ? Colors.white
+        : (isSoft ? color.withValues(alpha: 0.12) : color);
+    final foreground = isSoft || isOutline ? color : Colors.white;
+
+    return Container(
+      width: 42,
+      height: 42,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isOutline ? color : color.withValues(alpha: 0.22),
+          width: isOutline ? 1.5 : 1,
+        ),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          if (isAccent)
+            Positioned(
+              right: 7,
+              bottom: 7,
+              child: Container(
+                width: 14,
+                height: 3,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.75),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+          Text(
+            service.resolvedIconLabel,
+            style: TextStyle(
+              color: foreground,
+              fontSize: service.resolvedIconLabel.length > 2 ? 12 : 15,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
       ),
     );
   }

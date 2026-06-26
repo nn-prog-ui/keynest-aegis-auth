@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'service_master.dart';
 import 'shared_credential_bridge.dart';
 
 class ServiceDetailScreen extends StatelessWidget {
@@ -15,6 +16,8 @@ class ServiceDetailScreen extends StatelessWidget {
   static const Color _warning = Color(0xFFB45309);
   static const Color _warningSoft = Color(0xFFFFF7ED);
   static const Color _neutralSoft = Color(0xFFF3F4F6);
+  static const ServiceMasterRepository _serviceMasterRepository =
+      ServiceMasterRepository();
 
   String _formatDate(DateTime? value) {
     if (value == null) {
@@ -47,23 +50,41 @@ class ServiceDetailScreen extends StatelessWidget {
     return '$price ${_text(credential.currency ?? 'JPY')}';
   }
 
+  ServiceMaster? _serviceMaster() {
+    return _serviceMasterRepository.findForCredential(
+      serviceName: credential.serviceName,
+      domains: credential.domains,
+    );
+  }
+
+  String _effectiveCancelUrl() {
+    final savedCancelUrl = _text(credential.cancelUrl);
+    if (savedCancelUrl != '-') {
+      return savedCancelUrl;
+    }
+    return _text(_serviceMaster()?.cancelUrl);
+  }
+
   bool get _hasSubscription {
     return _text(credential.monthlyPrice) != '-' ||
         _text(credential.billingCycle) != '-' ||
         credential.renewalDate != null ||
         _text(credential.paymentMethod) != '-' ||
-        _text(credential.cancelUrl) != '-';
+        _effectiveCancelUrl() != '-';
   }
 
-  Uri? _loginUri() {
-    final loginUrl = _text(credential.loginUrl);
-    if (loginUrl == '-') {
+  Uri? _uriFromText(String? value) {
+    final url = _text(value);
+    if (url == '-') {
       return null;
     }
-    final normalized =
-        loginUrl.contains('://') ? loginUrl : 'https://$loginUrl';
+    final normalized = url.contains('://') ? url : 'https://$url';
     return Uri.tryParse(normalized);
   }
+
+  Uri? _loginUri() => _uriFromText(credential.loginUrl);
+
+  Uri? _cancelUri() => _uriFromText(_effectiveCancelUrl());
 
   Future<void> _openLoginUrl(BuildContext context) async {
     final uri = _loginUri();
@@ -78,6 +99,22 @@ class ServiceDetailScreen extends StatelessWidget {
     }
     if (!opened) {
       _showError(context, 'ログインページを開けませんでした');
+    }
+  }
+
+  Future<void> _openCancelUrl(BuildContext context) async {
+    final uri = _cancelUri();
+    if (uri == null || !uri.hasScheme || uri.host.isEmpty) {
+      _showError(context, '解約URLが登録されていません');
+      return;
+    }
+
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!context.mounted) {
+      return;
+    }
+    if (!opened) {
+      _showError(context, '解約ページを開けませんでした');
     }
   }
 
@@ -145,11 +182,13 @@ class ServiceDetailScreen extends StatelessWidget {
                   _detailRow('請求周期', _text(credential.billingCycle)),
                   _detailRow('更新日', _formatDate(credential.renewalDate)),
                   _detailRow('支払い方法', _text(credential.paymentMethod)),
-                  _detailRow('解約URL', _text(credential.cancelUrl)),
+                  _detailRow('解約URL', _effectiveCancelUrl()),
                 ] else ...[
                   _statusRow(label: '登録状態', value: '未登録', active: false),
                   _emptyHint('料金、更新日、支払い方法はあとから追加できます。'),
                 ],
+                const SizedBox(height: 10),
+                _cancelAction(context),
               ],
             ),
             const SizedBox(height: 12),
@@ -171,6 +210,22 @@ class ServiceDetailScreen extends StatelessWidget {
             _actionsCard(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _cancelAction(BuildContext context) {
+    final cancelUri = _cancelUri();
+    if (cancelUri == null) {
+      return _emptyHint('解約URL未登録');
+    }
+
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () => _openCancelUrl(context),
+        icon: const Icon(Icons.open_in_new_rounded),
+        label: const Text('解約ページを開く'),
       ),
     );
   }

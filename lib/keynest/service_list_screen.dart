@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'aegis_palette.dart';
 import 'service_account_add_screen.dart';
 import 'service_detail_screen.dart';
+import 'service_master.dart';
 import 'service_search_screen.dart';
 import 'shared_credential_bridge.dart';
 
@@ -20,6 +21,7 @@ class ServiceListScreen extends StatefulWidget {
 
 class _ServiceListScreenState extends State<ServiceListScreen> {
   final _credentialBridge = const SharedCredentialBridge();
+  final _serviceMasterRepository = const ServiceMasterRepository();
 
   late Future<List<SharedCredentialListItem>> _credentialsFuture;
 
@@ -188,6 +190,10 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
   }
 
   Widget _buildServiceCard(SharedCredentialListItem credential) {
+    final serviceMaster = _serviceMasterRepository.findForCredential(
+      serviceName: credential.serviceName,
+      domains: credential.domains,
+    );
     final badge = credential.serviceName.isNotEmpty
         ? credential.serviceName.characters.first.toUpperCase()
         : 'F';
@@ -210,22 +216,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: AegisPalette.brand,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      badge,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
+                  _serviceIcon(serviceMaster, fallbackLabel: badge),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -275,6 +266,59 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _serviceIcon(ServiceMaster? service, {required String fallbackLabel}) {
+    final color = Color(service?.iconColor ?? 0xFF0B8F6D);
+    final iconStyle = service?.iconStyle ?? 'solid';
+    final label = service?.resolvedIconLabel ?? fallbackLabel;
+    final isSoft = iconStyle == 'soft';
+    final isOutline = iconStyle == 'outline';
+    final isAccent = iconStyle == 'accent';
+    final background = isOutline
+        ? Colors.white
+        : (isSoft ? color.withValues(alpha: 0.12) : color);
+    final foreground = isSoft || isOutline ? color : Colors.white;
+
+    return Container(
+      width: 44,
+      height: 44,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isOutline ? color : color.withValues(alpha: 0.22),
+          width: isOutline ? 1.5 : 1,
+        ),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          if (isAccent)
+            Positioned(
+              right: 7,
+              bottom: 7,
+              child: Container(
+                width: 15,
+                height: 3,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.75),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+          Text(
+            label,
+            style: TextStyle(
+              color: foreground,
+              fontSize: label.length > 2 ? 12 : 16,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
       ),
     );
   }
