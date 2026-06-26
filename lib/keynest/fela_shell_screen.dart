@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'aegis_palette.dart';
+import 'onboarding/google_connect_screen.dart';
 import 'service_list_screen.dart';
 import 'shared_credential_bridge.dart';
 
@@ -236,6 +237,38 @@ class FelaHomePlaceholder extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.all(16),
             child: Text('重要な通知はまだありません。'),
+          ),
+        ),
+        const SizedBox(height: 18),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Googleから候補を作成',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'ダミーデータで、Gmail領収書からサービス候補を作る流れを確認できます。',
+                  style: TextStyle(color: Color(0xFF6B7280), height: 1.45),
+                ),
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const GoogleConnectScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.mail_outline_rounded),
+                  label: const Text('Google連携を試す'),
+                ),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 18),
