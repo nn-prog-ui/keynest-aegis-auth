@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'service_ai_profile.dart';
+import 'service_recommendation_engine.dart';
 import 'shared_credential_bridge.dart';
 
 class ServiceAccountSaveResult {
@@ -55,6 +56,7 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
   final _formKey = GlobalKey<FormState>();
   final _credentialBridge = const SharedCredentialBridge();
   final _serviceAiProfileRepository = const ServiceAiProfileRepository();
+  final _serviceRecommendationEngine = const ServiceRecommendationEngine();
 
   late final TextEditingController _serviceNameController;
   late final TextEditingController _domainsController;
@@ -399,6 +401,12 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
   }
 
   Widget _buildServiceAiProfileCard(ServiceAiProfile profile) {
+    final recommendation = _serviceRecommendationEngine.recommend(profile);
+    final recommendedPlanName = recommendation?.planRecommendation.planName;
+    final otherPlans = profile.planCandidates
+        .where((plan) => plan.name != recommendedPlanName)
+        .toList();
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -416,14 +424,19 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
               ],
             ),
             const SizedBox(height: 8),
-            _assistNotice(profile.aiAssistText),
-            const SizedBox(height: 12),
-            const Text(
-              'プラン候補',
-              style: TextStyle(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 8),
-            ...profile.planCandidates.map(_buildPlanCandidate),
+            if (recommendation != null) ...[
+              _buildRecommendation(recommendation),
+              const SizedBox(height: 12),
+            ],
+            if (otherPlans.isNotEmpty) ...[
+              const Text(
+                '他の候補',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 8),
+              ...otherPlans.map(_buildPlanCandidate),
+              const SizedBox(height: 12),
+            ],
             const SizedBox(height: 12),
             const Text(
               '請求周期候補',
@@ -443,9 +456,96 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
               }).toList(),
             ),
             const SizedBox(height: 12),
+            _assistNotice(profile.aiAssistText),
+            const SizedBox(height: 8),
             _assistNotice(
                 '料金と更新日はユーザーごとに異なります。候補をそのまま確定せず、実際の請求画面で確認して入力してください。'),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecommendation(ServiceRecommendation recommendation) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: const Color(0xFFEFF7F3),
+        border: Border.all(color: const Color(0xFFCDE5DC)),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () => _applyRecommendation(recommendation),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Felaからのおすすめ',
+                      style: TextStyle(
+                        color: Color(0xFF0B8F6D),
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  _smallInfoBadge(
+                    _billingCycleLabel(
+                      recommendation.billingCycleRecommendation.billingCycle,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                recommendation.planRecommendation.planName,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                recommendation.reason,
+                style: const TextStyle(
+                  color: Color(0xFF374151),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                recommendation.planRecommendation.reason,
+                style: const TextStyle(color: Color(0xFF6B7280)),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                recommendation.billingCycleRecommendation.reason,
+                style: const TextStyle(color: Color(0xFF6B7280)),
+              ),
+              if (recommendation.planRecommendation.priceHint.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Text(
+                  recommendation.planRecommendation.priceHint,
+                  style: const TextStyle(
+                    color: Color(0xFFB45309),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 6),
+              Text(
+                recommendation.caution,
+                style: const TextStyle(
+                  color: Color(0xFF92400E),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -542,6 +642,16 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
       _applyBillingCycle(plan.billingCycle, showSnack: false);
     }
     _showLocalSnack('${plan.name} を参考候補にしました。料金は確認して入力してください');
+  }
+
+  void _applyRecommendation(ServiceRecommendation recommendation) {
+    final billingCycle = recommendation.billingCycleRecommendation.billingCycle;
+    if (billingCycle.isNotEmpty) {
+      _applyBillingCycle(billingCycle, showSnack: false);
+    }
+    _showLocalSnack(
+      '${recommendation.planRecommendation.planName} を参考候補にしました。料金は確認して入力してください',
+    );
   }
 
   void _applyBillingCycle(String billingCycle, {bool showSnack = true}) {
