@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'shared_credential_bridge.dart';
 
@@ -54,8 +55,41 @@ class ServiceDetailScreen extends StatelessWidget {
         _text(credential.cancelUrl) != '-';
   }
 
+  Uri? _loginUri() {
+    final loginUrl = _text(credential.loginUrl);
+    if (loginUrl == '-') {
+      return null;
+    }
+    final normalized =
+        loginUrl.contains('://') ? loginUrl : 'https://$loginUrl';
+    return Uri.tryParse(normalized);
+  }
+
+  Future<void> _openLoginUrl(BuildContext context) async {
+    final uri = _loginUri();
+    if (uri == null || !uri.hasScheme || uri.host.isEmpty) {
+      _showError(context, 'ログインURLが登録されていません');
+      return;
+    }
+
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!context.mounted) {
+      return;
+    }
+    if (!opened) {
+      _showError(context, 'ログインページを開けませんでした');
+    }
+  }
+
+  void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final loginUri = _loginUri();
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -75,6 +109,16 @@ class ServiceDetailScreen extends StatelessWidget {
                 _detailRow('メールアドレス / ID', credential.username),
                 _detailRow('パスワード', '非表示'),
                 _detailRow('ログインURL', _text(credential.loginUrl)),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed:
+                        loginUri == null ? null : () => _openLoginUrl(context),
+                    icon: const Icon(Icons.open_in_new_rounded),
+                    label: const Text('ログインする'),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 12),
