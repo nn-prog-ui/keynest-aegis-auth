@@ -49,7 +49,11 @@ class _FelaShellScreenState extends State<FelaShellScreen> {
       _selectedSection = FelaSection.services;
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(result.snackMessage)),
+      SnackBar(
+        content: Text(
+          '${result.serviceName} を保存しました。サービス一覧であとから編集できます。',
+        ),
+      ),
     );
   }
 

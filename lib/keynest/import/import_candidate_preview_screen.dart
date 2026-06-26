@@ -40,15 +40,7 @@ class _ImportCandidatePreviewScreenState
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
           children: [
-            const Text(
-              'Felaが見つけた候補',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              '料金や更新日は参考候補です。保存前に必ず確認してください。',
-              style: TextStyle(color: Color(0xFF6B7280), height: 1.45),
-            ),
+            _buildHeader(),
             const SizedBox(height: 14),
             if (visibleCandidates.isEmpty)
               const Card(
@@ -61,6 +53,31 @@ class _ImportCandidatePreviewScreenState
               ...visibleCandidates.map(
                 (entry) => _buildCandidateCard(entry.key, entry.value),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Felaが見つけた候補',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '内容を確認してから保存します。候補は自動保存されません。',
+              style: TextStyle(color: Color(0xFF374151), height: 1.45),
+            ),
+            const SizedBox(height: 12),
+            _guidanceLine(Icons.visibility_outlined, '料金と更新日は参考候補です'),
+            _guidanceLine(Icons.edit_outlined, '保存後もサービス一覧であとから編集できます'),
           ],
         ),
       ),
@@ -139,27 +156,23 @@ class _ImportCandidatePreviewScreenState
               ),
             if (recommendation != null) ...[
               const SizedBox(height: 10),
-              Text(
-                recommendation.reason,
-                style: const TextStyle(
-                  color: Color(0xFF374151),
-                  fontWeight: FontWeight.w700,
-                  height: 1.35,
-                ),
+              _messagePanel(
+                title: 'おすすめ理由',
+                message: recommendation.reason,
+                color: const Color(0xFF0B8F6D),
+                backgroundColor: const Color(0xFFEFF7F3),
               ),
               const SizedBox(height: 6),
-              Text(
-                recommendation.caution,
-                style: const TextStyle(
-                  color: Color(0xFF92400E),
-                  fontWeight: FontWeight.w700,
-                  height: 1.35,
-                ),
+              _messagePanel(
+                title: '確認が必要です',
+                message: recommendation.caution,
+                color: const Color(0xFF92400E),
+                backgroundColor: const Color(0xFFFFF7ED),
               ),
             ],
             const SizedBox(height: 10),
             const Text(
-              '保存前にID / パスワード、料金、更新日を確認してください。候補は自動保存されません。',
+              '次の画面でID / パスワードを確認して保存します。料金と更新日はあとから編集できます。',
               style: TextStyle(
                 color: Color(0xFF6B7280),
                 fontWeight: FontWeight.w700,
@@ -173,7 +186,7 @@ class _ImportCandidatePreviewScreenState
                   child: FilledButton.icon(
                     onPressed: () => _openAddScreen(candidate),
                     icon: const Icon(Icons.check_rounded),
-                    label: const Text('確認して保存へ'),
+                    label: const Text('内容を確認して保存へ'),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -213,6 +226,61 @@ class _ImportCandidatePreviewScreenState
             child: Text(
               value.isEmpty ? '未設定' : value,
               style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _guidanceLine(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 7),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: AegisPalette.brand),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _messagePanel({
+    required String title,
+    required String message,
+    required Color color,
+    required Color backgroundColor,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            message,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w700,
+              height: 1.35,
             ),
           ),
         ],
