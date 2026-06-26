@@ -39,6 +39,7 @@ class _ServiceSearchScreenState extends State<ServiceSearchScreen> {
           initialServiceName: suggestion.name,
           initialDomains: suggestion.domains.join(', '),
           initialLoginUrl: suggestion.loginUrl,
+          initialCancelUrl: suggestion.cancelUrl,
           initialCurrency: suggestion.defaultCurrency,
           initialBillingCycle: suggestion.defaultBillingCycle,
         ),

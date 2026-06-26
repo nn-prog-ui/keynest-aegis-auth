@@ -31,6 +31,7 @@ class ServiceAccountAddScreen extends StatefulWidget {
     this.initialServiceName = '',
     this.initialDomains = '',
     this.initialLoginUrl = '',
+    this.initialCancelUrl = '',
     this.initialCurrency = 'JPY',
     this.initialBillingCycle = 'monthly',
   });
@@ -38,6 +39,7 @@ class ServiceAccountAddScreen extends StatefulWidget {
   final String initialServiceName;
   final String initialDomains;
   final String initialLoginUrl;
+  final String initialCancelUrl;
   final String initialCurrency;
   final String initialBillingCycle;
 
@@ -64,6 +66,8 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
 
   bool _isSaving = false;
   bool _obscurePassword = true;
+  bool _showAdvancedSettings = false;
+  bool _showRenewalDateInput = false;
 
   @override
   void initState() {
@@ -80,7 +84,7 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
         TextEditingController(text: widget.initialBillingCycle);
     _renewalDateController = TextEditingController();
     _paymentMethodController = TextEditingController();
-    _cancelUrlController = TextEditingController();
+    _cancelUrlController = TextEditingController(text: widget.initialCancelUrl);
   }
 
   @override
@@ -109,6 +113,14 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
   }
 
   Future<void> _saveServiceAccount() async {
+    if (_serviceNameController.text.trim().isEmpty || _domains.isEmpty) {
+      setState(() {
+        _showAdvancedSettings = true;
+      });
+      _showLocalSnack('手動追加では詳細設定のサービス名とドメインを入力してください');
+      return;
+    }
+
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -193,6 +205,8 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final serviceName = _serviceNameController.text.trim();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('サービス追加'),
@@ -203,151 +217,11 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
             children: [
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'ログイン情報',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _serviceNameController,
-                        decoration: const InputDecoration(labelText: 'サービス名'),
-                        textInputAction: TextInputAction.next,
-                        validator: (value) => _required(value, 'サービス名'),
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: _domainsController,
-                        decoration: const InputDecoration(
-                          labelText: 'ドメイン',
-                          hintText: 'amazon.co.jp, www.amazon.co.jp',
-                        ),
-                        textInputAction: TextInputAction.next,
-                        validator: (value) => _required(value, 'ドメイン'),
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: _loginUrlController,
-                        decoration: const InputDecoration(labelText: 'ログインURL'),
-                        keyboardType: TextInputType.url,
-                        textInputAction: TextInputAction.next,
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: _usernameController,
-                        decoration:
-                            const InputDecoration(labelText: 'メールアドレス / ID'),
-                        keyboardType: TextInputType.emailAddress,
-                        autofillHints: const [
-                          AutofillHints.username,
-                          AutofillHints.email,
-                        ],
-                        textInputAction: TextInputAction.next,
-                        validator: (value) => _required(value, 'メールアドレス / ID'),
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: _passwordController,
-                        decoration: InputDecoration(
-                          labelText: 'パスワード',
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                            ),
-                            tooltip: _obscurePassword ? '表示' : '非表示',
-                          ),
-                        ),
-                        obscureText: _obscurePassword,
-                        enableSuggestions: false,
-                        autocorrect: false,
-                        autofillHints: const [AutofillHints.password],
-                        textInputAction: TextInputAction.next,
-                        validator: (value) => _required(value, 'パスワード'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              _buildLoginCard(serviceName),
               const SizedBox(height: 12),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'サブスク情報',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _monthlyPriceController,
-                        decoration: const InputDecoration(labelText: '月額料金'),
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        textInputAction: TextInputAction.next,
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: _currencyController,
-                        decoration: const InputDecoration(labelText: '通貨'),
-                        textCapitalization: TextCapitalization.characters,
-                        textInputAction: TextInputAction.next,
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: _billingCycleController,
-                        decoration: const InputDecoration(
-                          labelText: '請求周期',
-                          hintText: 'monthly / yearly',
-                        ),
-                        textInputAction: TextInputAction.next,
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: _renewalDateController,
-                        decoration: const InputDecoration(
-                          labelText: '更新日',
-                          hintText: 'YYYY-MM-DD',
-                        ),
-                        keyboardType: TextInputType.datetime,
-                        textInputAction: TextInputAction.next,
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: _paymentMethodController,
-                        decoration: const InputDecoration(labelText: '支払い方法'),
-                        textInputAction: TextInputAction.next,
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: _cancelUrlController,
-                        decoration: const InputDecoration(labelText: '解約URL'),
-                        keyboardType: TextInputType.url,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              _buildAdvancedSettingsCard(),
+              const SizedBox(height: 12),
+              _buildSubscriptionCard(),
               const SizedBox(height: 16),
               FilledButton.icon(
                 onPressed: _isSaving ? null : _saveServiceAccount,
@@ -362,6 +236,245 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginCard(String serviceName) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              serviceName.isEmpty ? 'ログイン情報' : '$serviceName のログイン情報',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'まずはIDとパスワードだけで登録できます。',
+              style: TextStyle(color: Color(0xFF6B7280)),
+            ),
+            const SizedBox(height: 14),
+            TextFormField(
+              controller: _usernameController,
+              decoration: const InputDecoration(labelText: 'メールアドレス / ID'),
+              keyboardType: TextInputType.emailAddress,
+              autofillHints: const [
+                AutofillHints.username,
+                AutofillHints.email,
+              ],
+              textInputAction: TextInputAction.next,
+              validator: (value) => _required(value, 'メールアドレス / ID'),
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: _passwordController,
+              decoration: InputDecoration(
+                labelText: 'パスワード',
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                  ),
+                  tooltip: _obscurePassword ? '表示' : '非表示',
+                ),
+              ),
+              obscureText: _obscurePassword,
+              enableSuggestions: false,
+              autocorrect: false,
+              autofillHints: const [AutofillHints.password],
+              textInputAction: TextInputAction.next,
+              validator: (value) => _required(value, 'パスワード'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAdvancedSettingsCard() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          children: [
+            InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                setState(() {
+                  _showAdvancedSettings = !_showAdvancedSettings;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '詳細設定',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          SizedBox(height: 3),
+                          Text(
+                            'サービス名、ドメイン、URLを確認・編集',
+                            style: TextStyle(color: Color(0xFF6B7280)),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      _showAdvancedSettings
+                          ? Icons.expand_less_rounded
+                          : Icons.expand_more_rounded,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (_showAdvancedSettings) ...[
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _serviceNameController,
+                decoration: const InputDecoration(labelText: 'サービス名'),
+                textInputAction: TextInputAction.next,
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _domainsController,
+                decoration: const InputDecoration(
+                  labelText: 'ドメイン',
+                  hintText: 'amazon.co.jp, www.amazon.co.jp',
+                ),
+                textInputAction: TextInputAction.next,
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _loginUrlController,
+                decoration: const InputDecoration(labelText: 'ログインURL'),
+                keyboardType: TextInputType.url,
+                textInputAction: TextInputAction.next,
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _cancelUrlController,
+                decoration: const InputDecoration(labelText: '解約URL'),
+                keyboardType: TextInputType.url,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubscriptionCard() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'サブスク情報（任意）',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              '料金や更新日はあとから追加できます。',
+              style: TextStyle(color: Color(0xFF6B7280)),
+            ),
+            const SizedBox(height: 14),
+            TextFormField(
+              controller: _monthlyPriceController,
+              decoration: const InputDecoration(labelText: '月額料金'),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: _currencyController,
+              decoration: const InputDecoration(labelText: '通貨'),
+              textCapitalization: TextCapitalization.characters,
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: _billingCycleController,
+              decoration: const InputDecoration(
+                labelText: '請求周期',
+                hintText: 'monthly / yearly',
+              ),
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ChoiceChip(
+                  label: const Text('あとで設定'),
+                  selected: !_showRenewalDateInput,
+                  onSelected: (_) {
+                    setState(() {
+                      _showRenewalDateInput = false;
+                      _renewalDateController.clear();
+                    });
+                  },
+                ),
+                ChoiceChip(
+                  label: const Text('更新日を入力'),
+                  selected: _showRenewalDateInput,
+                  onSelected: (_) {
+                    setState(() {
+                      _showRenewalDateInput = true;
+                    });
+                  },
+                ),
+              ],
+            ),
+            if (_showRenewalDateInput) ...[
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _renewalDateController,
+                decoration: const InputDecoration(
+                  labelText: '次回更新日',
+                  hintText: 'YYYY-MM-DD',
+                ),
+                keyboardType: TextInputType.datetime,
+                textInputAction: TextInputAction.next,
+              ),
+            ],
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: _paymentMethodController,
+              decoration: const InputDecoration(labelText: '支払い方法'),
+              textInputAction: TextInputAction.next,
+            ),
+          ],
         ),
       ),
     );

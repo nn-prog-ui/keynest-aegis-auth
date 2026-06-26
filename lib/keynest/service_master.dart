@@ -5,6 +5,9 @@ class ServiceMaster {
     required this.category,
     required this.domains,
     required this.loginUrl,
+    this.cancelUrl = '',
+    this.supportUrl = '',
+    this.helpUrl = '',
     this.defaultCurrency = 'JPY',
     this.defaultBillingCycle = 'monthly',
     this.supportsAutofill = true,
@@ -20,6 +23,9 @@ class ServiceMaster {
   final String category;
   final List<String> domains;
   final String loginUrl;
+  final String cancelUrl;
+  final String supportUrl;
+  final String helpUrl;
   final String defaultCurrency;
   final String defaultBillingCycle;
   final bool supportsAutofill;
@@ -40,7 +46,10 @@ class ServiceMaster {
         name.toLowerCase().contains(normalized) ||
         category.toLowerCase().contains(normalized) ||
         domains.any((domain) => domain.toLowerCase().contains(normalized)) ||
-        loginUrl.toLowerCase().contains(normalized);
+        loginUrl.toLowerCase().contains(normalized) ||
+        cancelUrl.toLowerCase().contains(normalized) ||
+        supportUrl.toLowerCase().contains(normalized) ||
+        helpUrl.toLowerCase().contains(normalized);
   }
 }
 
@@ -114,6 +123,7 @@ const List<ServiceMaster> _serviceMasters = [
     category: '動画・音楽',
     domains: ['netflix.com', 'www.netflix.com'],
     loginUrl: 'https://www.netflix.com/login',
+    cancelUrl: 'https://www.netflix.com/cancelplan',
     isPopular: true,
   ),
   ServiceMaster(
@@ -142,6 +152,7 @@ const List<ServiceMaster> _serviceMasters = [
     category: '仕事',
     domains: ['adobe.com', 'auth.services.adobe.com'],
     loginUrl: 'https://auth.services.adobe.com/',
+    cancelUrl: 'https://account.adobe.com/plans',
     supportsTotp: true,
     isRecentlyAdded: true,
   ),
@@ -161,6 +172,7 @@ const List<ServiceMaster> _serviceMasters = [
     category: '仕事',
     domains: ['canva.com', 'www.canva.com'],
     loginUrl: 'https://www.canva.com/login/',
+    cancelUrl: 'https://www.canva.com/account/billing-and-plans/',
     supportsTotp: true,
     isRecentlyAdded: true,
   ),
@@ -170,6 +182,7 @@ const List<ServiceMaster> _serviceMasters = [
     category: '動画・音楽',
     domains: ['youtube.com', 'www.youtube.com'],
     loginUrl: 'https://accounts.google.com/',
+    cancelUrl: 'https://www.youtube.com/paid_memberships',
     supportsTotp: true,
     supportsPasskey: true,
     isPopular: true,
@@ -180,6 +193,7 @@ const List<ServiceMaster> _serviceMasters = [
     category: '動画・音楽',
     domains: ['spotify.com', 'accounts.spotify.com'],
     loginUrl: 'https://accounts.spotify.com/login',
+    cancelUrl: 'https://www.spotify.com/account/subscription/',
     isRecentlyAdded: true,
   ),
   ServiceMaster(
