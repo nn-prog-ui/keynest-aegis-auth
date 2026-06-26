@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'service_ai_profile.dart';
 import 'shared_credential_bridge.dart';
 
 class ServiceAccountSaveResult {
@@ -28,6 +29,7 @@ class ServiceAccountSaveResult {
 class ServiceAccountAddScreen extends StatefulWidget {
   const ServiceAccountAddScreen({
     super.key,
+    this.initialServiceId = '',
     this.initialServiceName = '',
     this.initialDomains = '',
     this.initialLoginUrl = '',
@@ -36,6 +38,7 @@ class ServiceAccountAddScreen extends StatefulWidget {
     this.initialBillingCycle = 'monthly',
   });
 
+  final String initialServiceId;
   final String initialServiceName;
   final String initialDomains;
   final String initialLoginUrl;
@@ -51,6 +54,7 @@ class ServiceAccountAddScreen extends StatefulWidget {
 class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
   final _formKey = GlobalKey<FormState>();
   final _credentialBridge = const SharedCredentialBridge();
+  final _serviceAiProfileRepository = const ServiceAiProfileRepository();
 
   late final TextEditingController _serviceNameController;
   late final TextEditingController _domainsController;
@@ -110,6 +114,10 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
         .where((value) => value.isNotEmpty)
         .toSet()
         .toList();
+  }
+
+  ServiceAiProfile? get _serviceAiProfile {
+    return _serviceAiProfileRepository.findByServiceId(widget.initialServiceId);
   }
 
   Future<void> _saveServiceAccount() async {
@@ -221,6 +229,10 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
               const SizedBox(height: 12),
               _buildAdvancedSettingsCard(),
               const SizedBox(height: 12),
+              if (_serviceAiProfile != null) ...[
+                _buildServiceAiProfileCard(_serviceAiProfile!),
+                const SizedBox(height: 12),
+              ],
               _buildSubscriptionCard(),
               const SizedBox(height: 16),
               FilledButton.icon(
@@ -384,6 +396,176 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildServiceAiProfileCard(ServiceAiProfile profile) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.auto_awesome_rounded, color: Color(0xFF0B8F6D)),
+                SizedBox(width: 8),
+                Text(
+                  'Felaの入力補助',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            _assistNotice(profile.aiAssistText),
+            const SizedBox(height: 12),
+            const Text(
+              'プラン候補',
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            ...profile.planCandidates.map(_buildPlanCandidate),
+            const SizedBox(height: 12),
+            const Text(
+              '請求周期候補',
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: profile.billingCycleCandidates.map((cycle) {
+                final selected = _billingCycleController.text.trim() == cycle;
+                return ChoiceChip(
+                  label: Text(_billingCycleLabel(cycle)),
+                  selected: selected,
+                  onSelected: (_) => _applyBillingCycle(cycle),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 12),
+            _assistNotice(
+                '料金と更新日はユーザーごとに異なります。候補をそのまま確定せず、実際の請求画面で確認して入力してください。'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlanCandidate(ServicePlanCandidate plan) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFFCDE5DC)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => _applyPlanCandidate(plan),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      plan.name,
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                  ),
+                  if (plan.billingCycle.isNotEmpty)
+                    _smallInfoBadge(_billingCycleLabel(plan.billingCycle)),
+                ],
+              ),
+              if (plan.description.isNotEmpty) ...[
+                const SizedBox(height: 5),
+                Text(
+                  plan.description,
+                  style: const TextStyle(color: Color(0xFF6B7280)),
+                ),
+              ],
+              if (plan.priceHint.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Text(
+                  plan.priceHint,
+                  style: const TextStyle(
+                    color: Color(0xFFB45309),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _assistNotice(String text) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF7ED),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Color(0xFF92400E),
+          fontWeight: FontWeight.w600,
+          height: 1.35,
+        ),
+      ),
+    );
+  }
+
+  Widget _smallInfoBadge(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEFF7F3),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0xFFCDE5DC)),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
+      ),
+    );
+  }
+
+  void _applyPlanCandidate(ServicePlanCandidate plan) {
+    if (plan.billingCycle.isNotEmpty) {
+      _applyBillingCycle(plan.billingCycle, showSnack: false);
+    }
+    _showLocalSnack('${plan.name} を参考候補にしました。料金は確認して入力してください');
+  }
+
+  void _applyBillingCycle(String billingCycle, {bool showSnack = true}) {
+    setState(() {
+      _billingCycleController.text = billingCycle;
+    });
+    if (showSnack) {
+      _showLocalSnack('請求周期候補を反映しました。料金と更新日は確認してください');
+    }
+  }
+
+  String _billingCycleLabel(String billingCycle) {
+    switch (billingCycle) {
+      case 'monthly':
+        return '月額';
+      case 'yearly':
+        return '年額';
+      case 'monthly_or_yearly':
+        return '月額/年額';
+      case 'none':
+        return 'なし';
+      default:
+        return billingCycle;
+    }
   }
 
   Widget _buildSubscriptionCard() {

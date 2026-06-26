@@ -36,6 +36,7 @@ class _ServiceSearchScreenState extends State<ServiceSearchScreen> {
         await Navigator.of(context).push<ServiceAccountSaveResult>(
       MaterialPageRoute(
         builder: (_) => ServiceAccountAddScreen(
+          initialServiceId: suggestion.id,
           initialServiceName: suggestion.name,
           initialDomains: suggestion.domains.join(', '),
           initialLoginUrl: suggestion.loginUrl,
