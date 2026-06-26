@@ -132,6 +132,11 @@ class _ImportCandidatePreviewScreenState
               )
             else if (priceHint.isNotEmpty)
               _infoRow('料金候補（参考）', priceHint),
+            if (candidate.sourceItem.renewalDateCandidate != null)
+              _infoRow(
+                '更新日候補（参考）',
+                _dateLabel(candidate.sourceItem.renewalDateCandidate!),
+              ),
             if (recommendation != null) ...[
               const SizedBox(height: 10),
               Text(
@@ -152,6 +157,15 @@ class _ImportCandidatePreviewScreenState
                 ),
               ),
             ],
+            const SizedBox(height: 10),
+            const Text(
+              '保存前にID / パスワード、料金、更新日を確認してください。候補は自動保存されません。',
+              style: TextStyle(
+                color: Color(0xFF6B7280),
+                fontWeight: FontWeight.w700,
+                height: 1.35,
+              ),
+            ),
             const SizedBox(height: 14),
             Row(
               children: [
@@ -159,7 +173,7 @@ class _ImportCandidatePreviewScreenState
                   child: FilledButton.icon(
                     onPressed: () => _openAddScreen(candidate),
                     icon: const Icon(Icons.check_rounded),
-                    label: const Text('保存'),
+                    label: const Text('確認して保存へ'),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -237,9 +251,7 @@ class _ImportCandidatePreviewScreenState
     if (!mounted || result == null) {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(result.snackMessage)),
-    );
+    Navigator.of(context).pop(result);
   }
 
   ServiceMaster? _serviceFor(ServiceAccountImportCandidate candidate) {
@@ -269,6 +281,12 @@ class _ImportCandidatePreviewScreenState
       default:
         return value;
     }
+  }
+
+  String _dateLabel(DateTime date) {
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    return '${date.year}-$month-$day';
   }
 }
 

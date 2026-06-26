@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../google/google_auth_service.dart';
 import '../import/import_candidate_preview_screen.dart';
 import '../import/import_pipeline.dart';
+import '../service_account_add_screen.dart';
 
 class GoogleConnectScreen extends StatefulWidget {
   const GoogleConnectScreen({super.key});
@@ -38,13 +39,17 @@ class _GoogleConnectScreenState extends State<GoogleConnectScreen> {
       if (!mounted) {
         return;
       }
-      await Navigator.of(context).push(
+      final result = await Navigator.of(context).push<ServiceAccountSaveResult>(
         MaterialPageRoute(
           builder: (_) => ImportCandidatePreviewScreen(
             candidates: candidates,
           ),
         ),
       );
+      if (!mounted || result == null) {
+        return;
+      }
+      Navigator.of(context).pop(result);
     } on GoogleAuthException catch (error) {
       _showSnack(error.message);
     } on ImportPipelineException catch (error) {

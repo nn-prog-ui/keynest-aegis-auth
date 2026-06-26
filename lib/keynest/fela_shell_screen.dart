@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'aegis_palette.dart';
 import 'onboarding/google_connect_screen.dart';
+import 'service_account_add_screen.dart';
 import 'service_list_screen.dart';
 import 'shared_credential_bridge.dart';
 
@@ -41,6 +42,15 @@ class _FelaShellScreenState extends State<FelaShellScreen> {
     setState(() {
       _selectedSection = section;
     });
+  }
+
+  void _handleImportedServiceSaved(ServiceAccountSaveResult result) {
+    setState(() {
+      _selectedSection = FelaSection.services;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(result.snackMessage)),
+    );
   }
 
   @override
@@ -97,7 +107,9 @@ class _FelaShellScreenState extends State<FelaShellScreen> {
   Widget _buildBody() {
     return switch (_selectedSection) {
       FelaSection.services => const ServiceListScreen(showAppBar: false),
-      FelaSection.home => const FelaHomePlaceholder(),
+      FelaSection.home => FelaHomePlaceholder(
+          onServiceSaved: _handleImportedServiceSaved,
+        ),
       FelaSection.authCodes => const FelaPlaceholderScreen(
           icon: Icons.verified_user_outlined,
           title: '認証コード',
@@ -221,7 +233,12 @@ class _FelaMenu extends StatelessWidget {
 }
 
 class FelaHomePlaceholder extends StatelessWidget {
-  const FelaHomePlaceholder({super.key});
+  const FelaHomePlaceholder({
+    super.key,
+    required this.onServiceSaved,
+  });
+
+  final ValueChanged<ServiceAccountSaveResult> onServiceSaved;
 
   @override
   Widget build(BuildContext context) {
@@ -257,12 +274,16 @@ class FelaHomePlaceholder extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 FilledButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
+                  onPressed: () async {
+                    final result = await Navigator.of(context)
+                        .push<ServiceAccountSaveResult>(
                       MaterialPageRoute(
                         builder: (_) => const GoogleConnectScreen(),
                       ),
                     );
+                    if (result != null) {
+                      onServiceSaved(result);
+                    }
                   },
                   icon: const Icon(Icons.mail_outline_rounded),
                   label: const Text('Google連携を試す'),
