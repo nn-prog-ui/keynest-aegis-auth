@@ -16,20 +16,6 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>Fela</string>
-	<key>NSCameraUsageDescription</key>
-	<string>QRコードを読み取り、認証アカウントを登録するためにカメラを使用します。</string>
-	<key>NSFaceIDUsageDescription</key>
-	<string>認証コードとサインイン承認を保護するためにFace IDを使用します。</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>このアプリではマイクを使用しませんが、関連するシステム権限確認のため説明文を設定しています。</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>必要に応じて認証アカウント登録に関連する画像を写真ライブラリへ保存するために使用します。</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>QRコード画像を選択して認証アカウントを登録するために写真ライブラリを使用します。</string>
-	<key>NSUserNotificationsUsageDescription</key>
-	<string>サインイン承認リクエストを通知するために使用します。</string>
-	<key>FirebaseAppDelegateProxyEnabled</key>
-	<true/>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -43,24 +29,40 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.1033344451358-raththrtaulet93k6jip4c0b8da20vr9</string>
+				<string>com.googleusercontent.apps.703705129602-l0vqhqskei88pe8eb7ol2u6r69devtup</string>
 			</array>
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<true/>
+	<key>GIDClientID</key>
+	<string>703705129602-l0vqhqskei88pe8eb7ol2u6r69devtup.apps.googleusercontent.com</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>QRコードを読み取り、認証アカウントを登録するためにカメラを使用します。</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>認証コードとサインイン承認を保護するためにFace IDを使用します。</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>このアプリではマイクを使用しませんが、関連するシステム権限確認のため説明文を設定しています。</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>必要に応じて認証アカウント登録に関連する画像を写真ライブラリへ保存するために使用します。</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>QRコード画像を選択して認証アカウントを登録するために写真ライブラリを使用します。</string>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>サインイン承認リクエストを通知するために使用します。</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
-	<key>UIMainStoryboardFile</key>
-	<string>Main</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
