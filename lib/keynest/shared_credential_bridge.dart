@@ -6,6 +6,7 @@ class SharedCredentialSaveRequest {
     required this.domains,
     required this.username,
     required this.password,
+    this.recordIdentifier,
     this.loginUrl,
     this.monthlyPrice,
     this.currency,
@@ -15,6 +16,7 @@ class SharedCredentialSaveRequest {
     this.cancelUrl,
   });
 
+  final String? recordIdentifier;
   final String serviceName;
   final List<String> domains;
   final String username;
@@ -29,6 +31,8 @@ class SharedCredentialSaveRequest {
 
   Map<String, Object?> toMethodArguments() {
     return {
+      if (recordIdentifier != null && recordIdentifier!.isNotEmpty)
+        'recordIdentifier': recordIdentifier,
       'serviceName': serviceName,
       'domains': domains,
       'username': username,

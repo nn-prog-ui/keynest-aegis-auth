@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'service_ai_profile.dart';
+import 'service_master.dart';
 import 'service_recommendation_engine.dart';
 import 'shared_credential_bridge.dart';
 
@@ -57,6 +58,7 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
   final _credentialBridge = const SharedCredentialBridge();
   final _serviceAiProfileRepository = const ServiceAiProfileRepository();
   final _serviceRecommendationEngine = const ServiceRecommendationEngine();
+  final _serviceMasterRepository = const ServiceMasterRepository();
 
   late final TextEditingController _serviceNameController;
   late final TextEditingController _domainsController;
@@ -150,9 +152,15 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
     });
 
     try {
+      final serviceName = _serviceNameController.text.trim();
+      final existingRecordIdentifier = await _findExistingRecordIdentifier(
+        serviceName: serviceName,
+        domains: _domains,
+      );
       final recordIdentifier = await _credentialBridge.saveCredential(
         SharedCredentialSaveRequest(
-          serviceName: _serviceNameController.text.trim(),
+          recordIdentifier: existingRecordIdentifier,
+          serviceName: serviceName,
           domains: _domains,
           loginUrl: _loginUrlController.text.trim(),
           username: _usernameController.text.trim(),
@@ -171,7 +179,7 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
       }
       Navigator.of(context).pop(
         ServiceAccountSaveResult(
-          serviceName: _serviceNameController.text.trim(),
+          serviceName: serviceName,
           autoFillTried: true,
           autoFillRegistered: autoFillResult,
         ),
@@ -187,6 +195,51 @@ class _ServiceAccountAddScreenState extends State<ServiceAccountAddScreen> {
         });
       }
     }
+  }
+
+  Future<String?> _findExistingRecordIdentifier({
+    required String serviceName,
+    required List<String> domains,
+  }) async {
+    final credentials = await _credentialBridge.listCredentials();
+    final serviceId = widget.initialServiceId.trim().toLowerCase();
+
+    if (serviceId.isNotEmpty) {
+      for (final credential in credentials) {
+        final service = _serviceMasterRepository.findForCredential(
+          serviceName: credential.serviceName,
+          domains: credential.domains,
+        );
+        if (service?.id.toLowerCase() == serviceId) {
+          return credential.recordIdentifier;
+        }
+      }
+    }
+
+    final normalizedDomains = domains.map(_normalize).toSet();
+    if (normalizedDomains.isNotEmpty) {
+      for (final credential in credentials) {
+        final credentialDomains = credential.domains.map(_normalize).toSet();
+        if (normalizedDomains.any(credentialDomains.contains)) {
+          return credential.recordIdentifier;
+        }
+      }
+    }
+
+    final normalizedServiceName = _normalize(serviceName);
+    if (normalizedServiceName.isNotEmpty) {
+      for (final credential in credentials) {
+        if (_normalize(credential.serviceName) == normalizedServiceName) {
+          return credential.recordIdentifier;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  String _normalize(String value) {
+    return value.trim().toLowerCase();
   }
 
   Future<bool> _tryRegisterAutoFill(String recordIdentifier) async {
