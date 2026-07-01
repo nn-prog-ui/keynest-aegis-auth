@@ -82,6 +82,11 @@ class GmailImportService {
     );
 
     if (response.statusCode != 200) {
+      if (response.statusCode == 401 || response.statusCode == 403) {
+        throw const GmailImportException(
+          'Gmailの権限がまだ許可されていない可能性があります',
+        );
+      }
       throw GmailImportException(
         'Gmailの候補一覧を取得できませんでした。(${response.statusCode})',
       );
@@ -125,6 +130,11 @@ class GmailImportService {
       return null;
     }
     if (response.statusCode != 200) {
+      if (response.statusCode == 401 || response.statusCode == 403) {
+        throw const GmailImportException(
+          'Gmailの権限がまだ許可されていない可能性があります',
+        );
+      }
       throw GmailImportException(
         'Gmailの候補詳細を取得できませんでした。(${response.statusCode})',
       );

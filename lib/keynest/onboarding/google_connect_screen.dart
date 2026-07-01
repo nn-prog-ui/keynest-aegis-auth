@@ -51,11 +51,11 @@ class _GoogleConnectScreenState extends State<GoogleConnectScreen> {
       }
       Navigator.of(context).pop(result);
     } on GoogleAuthException catch (error) {
-      _showSnack(error.message);
+      _showGoogleFailure(error);
     } on ImportPipelineException catch (error) {
-      _showSnack(error.message);
+      _showImportFailure(error);
     } catch (_) {
-      _showSnack('Google連携に失敗しました');
+      _showGoogleFailure();
     } finally {
       if (mounted) {
         setState(() {
@@ -71,6 +71,47 @@ class _GoogleConnectScreenState extends State<GoogleConnectScreen> {
     }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
+    );
+  }
+
+  void _showGoogleFailure([GoogleAuthException? error]) {
+    if (error?.isPermissionDenied ?? false) {
+      _showFailureSnack();
+      return;
+    }
+    _showFailureSnack(primaryMessage: error?.message ?? 'Google連携に失敗しました');
+  }
+
+  void _showImportFailure(ImportPipelineException error) {
+    final message = error.message;
+    if (message.contains('Gmailの権限') || message.contains('Googleアクセストークン')) {
+      _showFailureSnack();
+      return;
+    }
+    _showFailureSnack(primaryMessage: message);
+  }
+
+  void _showFailureSnack({
+    String primaryMessage = 'Google連携に失敗しました',
+  }) {
+    if (!mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(seconds: 5),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(primaryMessage),
+            const SizedBox(height: 4),
+            const Text('Gmailの権限がまだ許可されていない可能性があります'),
+            const SizedBox(height: 4),
+            const Text('あとで再試行できます'),
+          ],
+        ),
+      ),
     );
   }
 

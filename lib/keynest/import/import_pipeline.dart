@@ -1,3 +1,4 @@
+import '../gmail/gmail_import_service.dart';
 import '../google/google_auth_service.dart';
 import '../service_ai_profile.dart';
 import '../service_recommendation_engine.dart';
@@ -62,7 +63,9 @@ class ImportPipeline {
         }
         accessToken = await _googleAuthService.getAccessToken();
         if (accessToken == null || accessToken.trim().isEmpty) {
-          throw const ImportPipelineException('Googleアクセストークンを取得できませんでした。');
+          throw const ImportPipelineException(
+            'Gmailの権限がまだ許可されていない可能性があります',
+          );
         }
       }
 
@@ -70,6 +73,10 @@ class ImportPipeline {
       return items.map(_buildCandidate).toList(growable: false);
     } on ImportPipelineException {
       rethrow;
+    } on GoogleAuthException catch (error) {
+      throw ImportPipelineException(error.message, error);
+    } on GmailImportException catch (error) {
+      throw ImportPipelineException(error.message, error);
     } catch (error) {
       throw ImportPipelineException('インポート候補を作成できませんでした。', error);
     }

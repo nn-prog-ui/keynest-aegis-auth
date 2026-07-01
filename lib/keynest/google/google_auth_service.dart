@@ -1,12 +1,18 @@
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/services.dart';
 
 import 'google_account.dart';
 
 class GoogleAuthException implements Exception {
-  const GoogleAuthException(this.message, [this.cause]);
+  const GoogleAuthException(
+    this.message, [
+    this.cause,
+    this.isPermissionDenied = false,
+  ]);
 
   final String message;
   final Object? cause;
+  final bool isPermissionDenied;
 
   @override
   String toString() => 'GoogleAuthException: $message';
@@ -34,9 +40,18 @@ class GoogleAuthService {
         return null;
       }
       final accessToken = await _accessTokenFor(account);
+      if (accessToken == null || accessToken.trim().isEmpty) {
+        throw const GoogleAuthException(
+          'Google連携に失敗しました',
+          null,
+          true,
+        );
+      }
       return _toGoogleAccount(account, accessToken: accessToken);
+    } on GoogleAuthException {
+      rethrow;
     } catch (error) {
-      throw GoogleAuthException('Googleログインに失敗しました', error);
+      throw _googleAuthExceptionFor(error);
     }
   }
 
@@ -49,7 +64,10 @@ class GoogleAuthService {
       }
       return _toGoogleAccount(account);
     } catch (error) {
-      throw GoogleAuthException('Googleアカウント情報を取得できませんでした', error);
+      throw _googleAuthExceptionFor(
+        error,
+        fallbackMessage: 'Googleアカウント情報を取得できませんでした',
+      );
     }
   }
 
@@ -62,7 +80,10 @@ class GoogleAuthService {
       }
       return _accessTokenFor(account);
     } catch (error) {
-      throw GoogleAuthException('Googleアクセストークンを取得できませんでした', error);
+      throw _googleAuthExceptionFor(
+        error,
+        fallbackMessage: 'Googleアクセストークンを取得できませんでした',
+      );
     }
   }
 
@@ -72,6 +93,37 @@ class GoogleAuthService {
     } catch (error) {
       throw GoogleAuthException('Googleサインアウトに失敗しました', error);
     }
+  }
+
+  GoogleAuthException _googleAuthExceptionFor(
+    Object error, {
+    String fallbackMessage = 'Googleログインに失敗しました',
+  }) {
+    if (_isAccessDenied(error)) {
+      return GoogleAuthException(
+        'Google連携に失敗しました',
+        error,
+        true,
+      );
+    }
+    return GoogleAuthException(fallbackMessage, error);
+  }
+
+  bool _isAccessDenied(Object error) {
+    if (error is PlatformException) {
+      final code = error.code.toLowerCase();
+      final message = (error.message ?? '').toLowerCase();
+      final details = error.details?.toString().toLowerCase() ?? '';
+      return code.contains('access_denied') ||
+          code.contains('sign_in_failed') &&
+              details.contains('access_denied') ||
+          message.contains('access_denied') ||
+          details.contains('access_denied') ||
+          message.contains('403') ||
+          details.contains('403');
+    }
+    final text = error.toString().toLowerCase();
+    return text.contains('access_denied') || text.contains('403');
   }
 
   Future<String?> _accessTokenFor(GoogleSignInAccount account) async {
