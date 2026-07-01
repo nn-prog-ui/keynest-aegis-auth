@@ -52,14 +52,21 @@ class ImportPipeline {
     bool requireGoogleAccount = false,
   }) async {
     try {
-      if (source == ImportSource.gmail && requireGoogleAccount) {
-        final account = await _googleAuthService.currentAccount();
-        if (account == null) {
-          throw const ImportPipelineException('Googleアカウントが接続されていません。');
+      String? accessToken;
+      if (source == ImportSource.gmail) {
+        if (requireGoogleAccount) {
+          final account = await _googleAuthService.currentAccount();
+          if (account == null) {
+            throw const ImportPipelineException('Googleアカウントが接続されていません。');
+          }
+        }
+        accessToken = await _googleAuthService.getAccessToken();
+        if (accessToken == null || accessToken.trim().isEmpty) {
+          throw const ImportPipelineException('Googleアクセストークンを取得できませんでした。');
         }
       }
 
-      final items = await _parseImportItems(source);
+      final items = await _parseImportItems(source, accessToken: accessToken);
       return items.map(_buildCandidate).toList(growable: false);
     } on ImportPipelineException {
       rethrow;
@@ -68,8 +75,11 @@ class ImportPipeline {
     }
   }
 
-  Future<List<ImportItem>> _parseImportItems(ImportSource source) {
-    return _importRepository.preview(source);
+  Future<List<ImportItem>> _parseImportItems(
+    ImportSource source, {
+    String? accessToken,
+  }) {
+    return _importRepository.preview(source, accessToken: accessToken);
   }
 
   ServiceAccountImportCandidate _buildCandidate(ImportItem item) {

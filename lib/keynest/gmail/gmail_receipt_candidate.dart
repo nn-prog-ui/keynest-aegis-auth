@@ -18,4 +18,7 @@ class GmailReceiptCandidate {
   final String sourceQuery;
 
   bool get hasReceivedAt => receivedAt != null;
+
+  bool get hasSubject => subject.trim().isNotEmpty;
+  bool get hasSender => from.trim().isNotEmpty;
 }
