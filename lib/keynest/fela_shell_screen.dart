@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'aegis_palette.dart';
-import 'onboarding/google_connect_screen.dart';
-import 'service_account_add_screen.dart';
+import 'home/home_dashboard_screen.dart';
 import 'service_list_screen.dart';
-import 'shared_credential_bridge.dart';
 
 enum FelaSection {
   services,
@@ -42,19 +40,6 @@ class _FelaShellScreenState extends State<FelaShellScreen> {
     setState(() {
       _selectedSection = section;
     });
-  }
-
-  void _handleImportedServiceSaved(ServiceAccountSaveResult result) {
-    setState(() {
-      _selectedSection = FelaSection.services;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '${result.serviceName} を保存しました。サービス一覧であとから編集できます。',
-        ),
-      ),
-    );
   }
 
   @override
@@ -111,9 +96,7 @@ class _FelaShellScreenState extends State<FelaShellScreen> {
   Widget _buildBody() {
     return switch (_selectedSection) {
       FelaSection.services => const ServiceListScreen(showAppBar: false),
-      FelaSection.home => FelaHomePlaceholder(
-          onServiceSaved: _handleImportedServiceSaved,
-        ),
+      FelaSection.home => const HomeDashboardScreen(),
       FelaSection.authCodes => const FelaPlaceholderScreen(
           icon: Icons.verified_user_outlined,
           title: '認証コード',
@@ -232,119 +215,6 @@ class _FelaMenu extends StatelessWidget {
         ),
         onTap: () => onSelected(section),
       ),
-    );
-  }
-}
-
-class FelaHomePlaceholder extends StatelessWidget {
-  const FelaHomePlaceholder({
-    super.key,
-    required this.onServiceSaved,
-  });
-
-  final ValueChanged<ServiceAccountSaveResult> onServiceSaved;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
-      children: [
-        const Text(
-          '通知',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-        ),
-        const SizedBox(height: 8),
-        const Card(
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Text('重要な通知はまだありません。'),
-          ),
-        ),
-        const SizedBox(height: 18),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Googleから候補を作成',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'ダミーデータで、Gmail領収書からサービス候補を作る流れを確認できます。',
-                  style: TextStyle(color: Color(0xFF6B7280), height: 1.45),
-                ),
-                const SizedBox(height: 12),
-                FilledButton.icon(
-                  onPressed: () async {
-                    final result = await Navigator.of(context)
-                        .push<ServiceAccountSaveResult>(
-                      MaterialPageRoute(
-                        builder: (_) => const GoogleConnectScreen(),
-                      ),
-                    );
-                    if (result != null) {
-                      onServiceSaved(result);
-                    }
-                  },
-                  icon: const Icon(Icons.mail_outline_rounded),
-                  label: const Text('Google連携を試す'),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 18),
-        const Text(
-          '最近使ったサービス',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-        ),
-        const SizedBox(height: 8),
-        FutureBuilder<List<SharedCredentialListItem>>(
-          future: const SharedCredentialBridge().listCredentials(),
-          builder: (context, snapshot) {
-            final credentials =
-                (snapshot.data ?? const <SharedCredentialListItem>[]).take(3);
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Card(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text('読み込み中...'),
-                ),
-              );
-            }
-            if (credentials.isEmpty) {
-              return const Card(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text('サービスを追加すると、ここに最近使ったサービスが表示されます。'),
-                ),
-              );
-            }
-            return Column(
-              children: credentials
-                  .map(
-                    (credential) => Card(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      child: ListTile(
-                        leading: const Icon(Icons.apps_rounded),
-                        title: Text(
-                          credential.serviceName.isEmpty
-                              ? '未設定サービス'
-                              : credential.serviceName,
-                          style: const TextStyle(fontWeight: FontWeight.w800),
-                        ),
-                        subtitle: Text(credential.primaryDomain),
-                      ),
-                    ),
-                  )
-                  .toList(),
-            );
-          },
-        ),
-      ],
     );
   }
 }
