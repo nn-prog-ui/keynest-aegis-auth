@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../aegis_palette.dart';
+import '../shared_credential_bridge.dart';
 
 class HomeDashboardScreen extends StatelessWidget {
   const HomeDashboardScreen({super.key});
@@ -123,21 +124,62 @@ class _UpcomingRenewalsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _DashboardSectionCard(
-      icon: Icons.event_available_outlined,
-      title: '次回更新予定',
-      subtitle: '近い予定だけを表示します',
-      children: [
-        _RenewalRow(
-          serviceName: 'Netflix',
-          detail: '7月20日',
-        ),
-        _RenewalRow(
-          serviceName: 'ChatGPT',
-          detail: '7月28日',
-        ),
-      ],
+    return FutureBuilder<List<SharedCredentialListItem>>(
+      future: const SharedCredentialBridge().listCredentials(),
+      builder: (context, snapshot) {
+        final children = switch (snapshot.connectionState) {
+          ConnectionState.waiting => const <Widget>[
+              _EmptyRenewalState(message: '更新予定を確認しています。'),
+            ],
+          _ => _renewalChildren(snapshot.data ?? const []),
+        };
+
+        return _DashboardSectionCard(
+          icon: Icons.event_available_outlined,
+          title: '次回更新予定',
+          subtitle: '近い予定だけを表示します',
+          children: children,
+        );
+      },
     );
+  }
+
+  List<Widget> _renewalChildren(List<SharedCredentialListItem> credentials) {
+    final today = DateTime.now();
+    final todayStart = DateTime(today.year, today.month, today.day);
+    final upcoming = credentials
+        .where((credential) => credential.renewalDate != null)
+        .where((credential) {
+      final renewalDate = credential.renewalDate!.toLocal();
+      final renewalDateStart = DateTime(
+        renewalDate.year,
+        renewalDate.month,
+        renewalDate.day,
+      );
+      return !renewalDateStart.isBefore(todayStart);
+    }).toList()
+      ..sort((a, b) => a.renewalDate!.compareTo(b.renewalDate!));
+
+    final rows = upcoming.take(2).map((credential) {
+      return _RenewalRow(
+        serviceName: credential.serviceName.trim().isEmpty
+            ? '未設定サービス'
+            : credential.serviceName,
+        detail: _dateLabel(credential.renewalDate!),
+      );
+    }).toList(growable: false);
+
+    if (rows.isEmpty) {
+      return const <Widget>[
+        _EmptyRenewalState(message: '近い更新予定はまだありません'),
+      ];
+    }
+    return rows;
+  }
+
+  String _dateLabel(DateTime date) {
+    final localDate = date.toLocal();
+    return '${localDate.month}月${localDate.day}日';
   }
 }
 
@@ -315,6 +357,34 @@ class _RenewalRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _EmptyRenewalState extends StatelessWidget {
+  const _EmptyRenewalState({
+    required this.message,
+  });
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AegisPalette.border),
+      ),
+      child: Text(
+        message,
+        style: const TextStyle(
+          color: Color(0xFF6B7280),
+          fontWeight: FontWeight.w800,
+        ),
       ),
     );
   }
