@@ -8,58 +8,74 @@ class HomeDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
-      children: [
-        _buildHeader(),
-        const SizedBox(height: 14),
-        const _SummaryGrid(),
-        const SizedBox(height: 14),
-        const _UpcomingRenewalsCard(),
-        const SizedBox(height: 14),
-        const _SuggestionCard(),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
+      children: const [
+        _HealthHeaderCard(),
+        SizedBox(height: 16),
+        _MonthlyCostCard(),
+        SizedBox(height: 12),
+        _ProtectionStateCard(),
+        SizedBox(height: 12),
+        _UpcomingRenewalsCard(),
       ],
     );
   }
+}
 
-  Widget _buildHeader() {
+class _HealthHeaderCard extends StatelessWidget {
+  const _HealthHeaderCard();
+
+  static const bool hasImportantNotice = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = hasImportantNotice ? '確認したいことがあります。' : 'おかえり';
+    final message =
+        hasImportantNotice ? 'いくつか確認すると安心な項目があります。' : '今日は大きな問題はありません。';
+    final icon = hasImportantNotice
+        ? Icons.notifications_active_outlined
+        : Icons.health_and_safety_outlined;
+    final color =
+        hasImportantNotice ? const Color(0xFFB45309) : AegisPalette.brand;
+    final backgroundColor =
+        hasImportantNotice ? const Color(0xFFFFF7ED) : AegisPalette.brandSoft;
+
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 46,
-              height: 46,
+              width: 52,
+              height: 52,
               decoration: BoxDecoration(
-                color: AegisPalette.brandSoft,
-                borderRadius: BorderRadius.circular(14),
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(16),
               ),
-              child: const Icon(
-                Icons.dashboard_customize_outlined,
-                color: AegisPalette.brand,
-              ),
+              child: Icon(icon, color: color, size: 28),
             ),
-            const SizedBox(height: 16),
-            const Text(
-              'おかえり',
-              style: TextStyle(
+            const SizedBox(height: 18),
+            Text(
+              title,
+              style: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w900,
               ),
             ),
-            const SizedBox(height: 6),
-            const Text(
-              '今日のデジタルライフ',
-              style: TextStyle(
-                fontSize: 16,
-                color: Color(0xFF4B5563),
-                fontWeight: FontWeight.w700,
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: const TextStyle(
+                fontSize: 18,
+                color: Color(0xFF111827),
+                fontWeight: FontWeight.w800,
+                height: 1.45,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             const Text(
-              'Felaが、サービス・固定費・保護状態をまとめて見えるようにします。',
+              'Felaが、固定費・保護状態・更新予定を静かに見守ります。',
               style: TextStyle(
                 color: Color(0xFF6B7280),
                 height: 1.45,
@@ -72,113 +88,32 @@ class HomeDashboardScreen extends StatelessWidget {
   }
 }
 
-class _SummaryGrid extends StatelessWidget {
-  const _SummaryGrid();
+class _MonthlyCostCard extends StatelessWidget {
+  const _MonthlyCostCard();
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final twoColumns = constraints.maxWidth >= 520;
-        return GridView.count(
-          crossAxisCount: twoColumns ? 2 : 1,
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: twoColumns ? 2.25 : 2.7,
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          children: const [
-            _MetricCard(
-              icon: Icons.payments_outlined,
-              label: '今月のデジタル固定費',
-              value: '12,480円',
-              caption: 'ダミー値',
-              color: Color(0xFF0B8F6D),
-            ),
-            _MetricCard(
-              icon: Icons.verified_user_outlined,
-              label: '保護率',
-              value: '68%',
-              caption: 'ダミー値',
-              color: Color(0xFF2563EB),
-            ),
-          ],
-        );
-      },
+    return const _InsightCard(
+      icon: Icons.payments_outlined,
+      title: '今月の固定費',
+      primaryText: '12,480円の予定です',
+      secondaryText: '登録済みサービスの月額をまとめた目安です。',
+      accentColor: AegisPalette.brand,
     );
   }
 }
 
-class _MetricCard extends StatelessWidget {
-  const _MetricCard({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.caption,
-    required this.color,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-  final String caption;
-  final Color color;
+class _ProtectionStateCard extends StatelessWidget {
+  const _ProtectionStateCard();
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(13),
-              ),
-              child: Icon(icon, color: color),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Color(0xFF6B7280),
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    value,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    caption,
-                    style: const TextStyle(
-                      color: Color(0xFF9CA3AF),
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+    return const _InsightCard(
+      icon: Icons.verified_user_outlined,
+      title: '保護されているサービス',
+      primaryText: '多くのサービスが見守られています',
+      secondaryText: 'AutoFillや2FAの状態は、今後ここに自然に反映します。',
+      accentColor: Color(0xFF2563EB),
     );
   }
 }
@@ -191,48 +126,88 @@ class _UpcomingRenewalsCard extends StatelessWidget {
     return const _DashboardSectionCard(
       icon: Icons.event_available_outlined,
       title: '次回更新予定',
-      subtitle: '近いうちに確認したい支払い',
+      subtitle: '近い予定だけを表示します',
       children: [
         _RenewalRow(
           serviceName: 'Netflix',
-          detail: '7月20日 / 1,490円',
+          detail: '7月20日',
         ),
         _RenewalRow(
           serviceName: 'ChatGPT',
-          detail: '7月28日 / 20 USD',
-        ),
-        _RenewalRow(
-          serviceName: 'YouTube Premium',
-          detail: '更新日を確認',
+          detail: '7月28日',
         ),
       ],
     );
   }
 }
 
-class _SuggestionCard extends StatelessWidget {
-  const _SuggestionCard();
+class _InsightCard extends StatelessWidget {
+  const _InsightCard({
+    required this.icon,
+    required this.title,
+    required this.primaryText,
+    required this.secondaryText,
+    required this.accentColor,
+  });
+
+  final IconData icon;
+  final String title;
+  final String primaryText;
+  final String secondaryText;
+  final Color accentColor;
 
   @override
   Widget build(BuildContext context) {
-    return const _DashboardSectionCard(
-      icon: Icons.auto_awesome_outlined,
-      title: 'Felaからの提案',
-      subtitle: '次に補完すると便利なこと',
-      children: [
-        _SuggestionRow(
-          icon: Icons.lock_outline_rounded,
-          text: '3サービスでAutoFill設定を確認できます',
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: accentColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: accentColor),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Color(0xFF6B7280),
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    primaryText,
+                    style: const TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w900,
+                      height: 1.25,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    secondaryText,
+                    style: const TextStyle(
+                      color: Color(0xFF6B7280),
+                      height: 1.45,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        _SuggestionRow(
-          icon: Icons.password_outlined,
-          text: '2FA未登録の重要サービスがあります',
-        ),
-        _SuggestionRow(
-          icon: Icons.payments_outlined,
-          text: '料金未設定のサブスク候補があります',
-        ),
-      ],
+      ),
     );
   }
 }
@@ -254,7 +229,7 @@ class _DashboardSectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -301,19 +276,30 @@ class _RenewalRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AegisPalette.border),
+      ),
       child: Row(
         children: [
           Container(
-            width: 10,
-            height: 10,
+            width: 34,
+            height: 34,
             decoration: const BoxDecoration(
-              color: AegisPalette.brand,
+              color: AegisPalette.brandSoft,
               shape: BoxShape.circle,
             ),
+            child: const Icon(
+              Icons.calendar_today_outlined,
+              size: 17,
+              color: AegisPalette.brand,
+            ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               serviceName,
@@ -326,41 +312,6 @@ class _RenewalRow extends StatelessWidget {
             style: const TextStyle(
               color: Color(0xFF6B7280),
               fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SuggestionRow extends StatelessWidget {
-  const _SuggestionRow({
-    required this.icon,
-    required this.text,
-  });
-
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AegisPalette.border),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: AegisPalette.brand, size: 20),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(fontWeight: FontWeight.w800),
             ),
           ),
         ],
