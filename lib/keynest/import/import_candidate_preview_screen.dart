@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../aegis_palette.dart';
 import '../service_account_add_screen.dart';
+import '../service_brand_icon.dart';
 import '../service_master.dart';
 import 'import_source.dart';
 import 'service_account_import_candidate.dart';
@@ -110,7 +111,11 @@ class _ImportCandidatePreviewScreenState
           children: [
             Row(
               children: [
-                _ServiceGlyph(service: service, fallbackName: serviceName),
+                ServiceBrandIcon(
+                  service: service,
+                  fallbackName: serviceName,
+                  size: 46,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -355,43 +360,6 @@ class _ImportCandidatePreviewScreenState
     final month = date.month.toString().padLeft(2, '0');
     final day = date.day.toString().padLeft(2, '0');
     return '${date.year}-$month-$day';
-  }
-}
-
-class _ServiceGlyph extends StatelessWidget {
-  const _ServiceGlyph({
-    required this.service,
-    required this.fallbackName,
-  });
-
-  final ServiceMaster? service;
-  final String fallbackName;
-
-  @override
-  Widget build(BuildContext context) {
-    final color =
-        service == null ? AegisPalette.brand : Color(service!.iconColor);
-    final label = service?.resolvedIconLabel ??
-        (fallbackName.isEmpty ? 'F' : fallbackName.substring(0, 1));
-
-    return Container(
-      width: 46,
-      height: 46,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(13),
-        border: Border.all(color: color.withValues(alpha: 0.22)),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontWeight: FontWeight.w900,
-          fontSize: 16,
-        ),
-      ),
-    );
   }
 }
 
